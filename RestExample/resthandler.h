@@ -12,9 +12,6 @@ class RestHandler : public QObject
 {
 
 private:
-    QString user;
-    QString bucket;
-    QString authkey;
     QString hmacSha1(QByteArray key, QByteArray secret);
     QString hmac_sha1(const QString key,const QString secret);
     QString createSignature(QByteArray key);
@@ -24,7 +21,6 @@ public:
     QByteArray makePutRequest(QFile *file);
     QString calculateSignature(QString authkey);
     QByteArray makeGetUrl();
-
 };
 
 #endif // RESTHANDLER_H
