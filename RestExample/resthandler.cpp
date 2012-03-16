@@ -4,102 +4,101 @@
 #include <QByteArray>
 #include <QCryptographicHash>
 #include <QDebug>
-#include <QLocale>
 #include <QUrl>
+#include <QSettings>
 
 /**
   At the moment resthandler just encodes everyting in to urls
   Todo:
     Finding out if it is possible to open a connection with QNetworkAccessManager and then throwing evering in there
     Generalizing this so that it works on everything.
-	
+
     Example:
         One could save settings in to cloud and when program starts resthandler gets them from cloud.
-    
-    ATM WILL NOT WORK without mine secretkey and authkey.
+
+    The main window(window.cpp) call this class to make the REST requests that are needed to access the Amazon S3. The call goes
+    to RestHandler::makeRequestUrl(), params being the type of request and what the request wants. With these informations the
+    request and the authorization signature is made.
+
+  Questions:
+    should the settings be encrypted?
+    if a developer ships a software with cloud capabilities can the client mine the settings from the app?
+    this kind of action is really not wanted because if the client finds the secretKey and authKey they can access
+    the cloud with every right.
   */
 
+const QSettings settings("RestExample", "RestHandler");
+enum REQUEST_TYPE {PUT, GET};
 
-const QString DEFAULT_HOST = "s3.amazon.com";
-const QByteArray secretKey("Your secretKey");
-const QString authKey("Your authKey");
+RestHandler::RestHandler(){}
 
-RestHandler::RestHandler()
+QUrl RestHandler::makeRequestUrl(REQUEST_TYPE type, QString fileName)
 {
-}
-/**
-  makePutRequest(QFile *file), still pretty explanatory method
 
-  */
-QByteArray RestHandler::makePutRequest(QFile *file) {
-    qDebug() << "making request to put";
 
+    qDebug() << "makeRequestUrl with parameters " << type << " " << fileName;
+    QString bucket = "kikkare";
+    QByteArray url;
     QByteArray stringToSign;
-    stringToSign += "PUT\n";
+    QString verb = (type == GET) ? "GET" : "PUT";
+    QString time(QString::number((QDateTime::currentMSecsSinceEpoch()/1000)+200));
+
+
+
+    stringToSign += verb + "\n";
     stringToSign += "\n";
     stringToSign += "\n";
-
-    QString time(QString::number((QDateTime::currentMSecsSinceEpoch()/1000)+100));
-    stringToSign += time+ "\n";
-    stringToSign += "/kikkare/text.txt";
-
+    stringToSign += time + "\n";
+    stringToSign += "/" + bucket + "/" + fileName;
     QString signature = createSignature(stringToSign);
+    qDebug() << stringToSign;
 
-    QByteArray url = "http://kikkare.s3-eu-west-1.amazonaws.com/text.txt";
+
+    url.append("http://" + bucket + ".s3-eu-west-1.amazonaws.com/" + fileName);
     url.append("?AWSAccessKeyId=");
-    url.append(authKey);
+    url.append(settings.value("authKey").toString());
     url.append("&Signature=");
     url.append(signature);
     url.append("&Expires=");
     url.append(time);
-    url.append("&Content-Length:");
-    url.append(file->size());
-    return url.data();
+    if (type == PUT) {
+        QFile file(fileName);
+        url.append("&Content-Length:");
+        url.append(fileSize(file));
+    }
+    return QUrl::fromEncoded(url);
+
 }
 
-/**
-  makeGetUrl(), the method name is pretty selfexplanatory.
-  */
-QByteArray RestHandler::makeGetUrl(){
 
-    QByteArray stringToSign;
-    stringToSign += "GET\n";
-    stringToSign += "\n";
-    stringToSign += "\n";
-
-    QString time(QString::number((QDateTime::currentMSecsSinceEpoch()/1000)+100));
-
-    stringToSign += time + "\n";
-    stringToSign += "/kikkare/text.txt";
-
-    QString signature = createSignature(stringToSign);
-
-    QByteArray url = "http://kikkare.s3-eu-west-1.amazonaws.com/text.txt" ;
-            url.append("?AWSAccessKeyId=");
-            url.append(authKey);
-            url.append("&Signature=");
-            url.append(signature);
-            url.append("&Expires=");
-            url.append(time);
-    return url.data();
+qint64 RestHandler::fileSize(QFile &file)
+{
+    if (!file.open(QIODevice::ReadWrite))
+        return 0;
+    return file.size();
 }
 
 /**
   A helper method to create the signature. Did not want to send the secretKey always in every
   method call.
   */
-QString RestHandler::createSignature(QByteArray stringToSign){
-    QString hash = hmacSha1(stringToSign, secretKey);
-    qDebug() << "replacing the + and / from the hash";
-    hash.replace("/","%2F");
-    hash.replace("+","%2B");
-    return hash;
+QString RestHandler::createSignature(QByteArray stringToSign)
+{
+    QString hashed = hmacSha1(stringToSign, settings.value("secretKey").toByteArray());
+    qDebug() << "Before replacement "<< hashed;
+
+    hashed.replace("/", "%2F");
+    hashed.replace("+", "%2B");
+
+    qDebug() << "After" << hashed;
+    return hashed.toUtf8();
 }
 /**
   * hmac-Sha1 encryption algorithm from http://qt-project.org/wiki/HMAC-SHA1
   * encrypts the signature with the secretKey.
   */
-QString RestHandler::hmacSha1(QByteArray stringToSign, QByteArray secretKey) {
+QString RestHandler::hmacSha1(QByteArray stringToSign, QByteArray secretKey)
+{
 
     qDebug() << "Calculating the hmacSha1 from the packet";
     int blockSize = 64; // HMAC-SHA-1 block size, defined in SHA-1 standard
@@ -123,5 +122,6 @@ QString RestHandler::hmacSha1(QByteArray stringToSign, QByteArray secretKey) {
     part.append(stringToSign);
     total.append(QCryptographicHash::hash(part, QCryptographicHash::Sha1));
     QByteArray hashed = QCryptographicHash::hash(total, QCryptographicHash::Sha1);
+
     return hashed.toBase64();
 }

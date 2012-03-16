@@ -12,9 +12,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         window.cpp \
-    resthandler.cpp
+    resthandler.cpp \
+    dialog.cpp
 
 HEADERS  += window.h \
-    resthandler.h
+    resthandler.h \
+    dialog.h
 
-FORMS    += window.ui
+FORMS    += window.ui \
+    dialog.ui
