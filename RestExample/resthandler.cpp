@@ -34,25 +34,18 @@ RestHandler::RestHandler(){}
 
 QUrl RestHandler::makeRequestUrl(REQUEST_TYPE type, QString fileName)
 {
-
-
-    qDebug() << "makeRequestUrl with parameters " << type << " " << fileName;
     QString bucket = "kikkare";
     QByteArray url;
     QByteArray stringToSign;
     QString verb = (type == GET) ? "GET" : "PUT";
     QString time(QString::number((QDateTime::currentMSecsSinceEpoch()/1000)+200));
 
-
-
     stringToSign += verb + "\n";
     stringToSign += "\n";
     stringToSign += "\n";
     stringToSign += time + "\n";
-    stringToSign += "/" + bucket + "/" + fileName;
+    stringToSign += "/" + bucket + "/" + fileName; // this needs to be rethinked.
     QString signature = createSignature(stringToSign);
-    qDebug() << stringToSign;
-
 
     url.append("http://" + bucket + ".s3-eu-west-1.amazonaws.com/" + fileName);
     url.append("?AWSAccessKeyId=");
@@ -70,7 +63,6 @@ QUrl RestHandler::makeRequestUrl(REQUEST_TYPE type, QString fileName)
 
 }
 
-
 qint64 RestHandler::fileSize(QFile &file)
 {
     if (!file.open(QIODevice::ReadWrite))
@@ -85,22 +77,17 @@ qint64 RestHandler::fileSize(QFile &file)
 QString RestHandler::createSignature(QByteArray stringToSign)
 {
     QString hashed = hmacSha1(stringToSign, settings.value("secretKey").toByteArray());
-    qDebug() << "Before replacement "<< hashed;
-
     hashed.replace("/", "%2F");
     hashed.replace("+", "%2B");
-
-    qDebug() << "After" << hashed;
     return hashed.toUtf8();
 }
+
 /**
   * hmac-Sha1 encryption algorithm from http://qt-project.org/wiki/HMAC-SHA1
   * encrypts the signature with the secretKey.
   */
 QString RestHandler::hmacSha1(QByteArray stringToSign, QByteArray secretKey)
-{
-
-    qDebug() << "Calculating the hmacSha1 from the packet";
+{ 
     int blockSize = 64; // HMAC-SHA-1 block size, defined in SHA-1 standard
     if (secretKey.length() > blockSize) { // if key is longer than block size (64), reduce key length with SHA-1 compression
         secretKey = QCryptographicHash::hash(secretKey, QCryptographicHash::Sha1);

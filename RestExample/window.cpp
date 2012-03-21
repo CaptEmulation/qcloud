@@ -7,27 +7,28 @@
 #include <QNetworkReply>
 #include <QUrl>
 #include <QDateTime>
-#include <QBuffer>
 #include <QSettings>
+#include <QDomDocument>
+#include <QXmlInputSource>
+#include <QDomNodeList>
+
+
 
 /**
   Author: Jarkko Laitinen
-  This is a really really alpha version of the software.
+  This is a really alpha version of the software.
   */
 
 /**
   Works on a hard coded values atm, will need to do alot of refactoring to generalize the whole thingy. Can now upload a file to a certain bucket in amazon s3
   and retrieve the same file.
   TODO:
-      Generalization of the requests.
-      Refactoring of the whole RestHandler class.
       Learning the 'right' way of doing the returning of QStrings and QByteArrays (pointers?)
       Alot of general learning of the c++ way of doing things coming from Java.
       Does not include ANY error handling so that should be taken care of.
-
-
-  The version that is in git will not contain my own secretKey and authkey because I think that I don't want to share em.
-
+  */
+/**
+  Now includes settings menu where one can enter his/her own amazon s3 credentials and then access the bucket.
   */
 
 
@@ -42,85 +43,68 @@ Window::Window(QWidget *parent) :
     QSettings settings("RestExample", "RestHandler");
 
     if (settings.value("userName").toString() == "") {
-
         ui->sendButton->setEnabled(false);
         ui->button->setEnabled(false);
         ui->textBox->setText("Please insert your account info in preferences");
     }
-
-
 }
+
 
 Window::~Window()
 {
     delete ui;
-
 }
 
 
 void Window::slotOpenSettingsDialog()
 {
     newDialog = new Dialog();
-    connect(newDialog,SIGNAL(accepted()), this, SLOT(slotSettingsSaved()));
+    connect(newDialog, SIGNAL(accepted()), this, SLOT(slotSettingsSaved()));
     newDialog->show();
-
 }
 
-/**
-  Initial version of the loading from cloud function.
-  Todo:
-    somehow generalizing the sending and receiving so that there would not be this much repetition.
-  */
 void Window::on_button_clicked()
-{    
-    RestHandler *hr = new RestHandler();
-    qDebug() << "made the resthandler";
-
-
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    qDebug() << "making the connections";
-
-    QNetworkReply *reply;
-
-    QNetworkRequest bar(hr->makeRequestUrl(RestHandler::GET, ui->commandBox->text()));
-
-
-    connect(manager, SIGNAL(finished(QNetworkReply *)), SLOT(slotRequestFinished(QNetworkReply *)));
-    qDebug() << "sending packet: " << bar.url();
-
-    reply = manager->sendCustomRequest(bar,QByteArray("GET"));
-
-    connect(reply, SIGNAL(downloadProgress(qint64,qint64)), SLOT(slotSetProgress(qint64,qint64)));
-
+{
+    doRequest(RestHandler::GET);
 }
-/**
-  Spaghetticode version of the uploading of files.
-  */
 void Window::on_sendButton_clicked()
 {
-    qDebug() << "uploading the file to amazon cloud";
-    RestHandler *hr = new RestHandler();
-    QFile file(ui->commandBox->text());
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
-        return;
-    }
-
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    QNetworkReply *reply;
-    QTextStream out(&file);
-    out << ui->textBox->toPlainText();
-    file.close();
-    QNetworkRequest request((hr->makeRequestUrl(RestHandler::PUT, ui->commandBox->text())));
-    file.open(QIODevice::ReadOnly);
-    connect(manager, SIGNAL(finished(QNetworkReply*)), SLOT(slotRequestFinished(QNetworkReply*)));
-
-    reply = manager->put(request, file.readAll());
+    doRequest(RestHandler::PUT);
 }
 
+void Window::doRequest(RestHandler::REQUEST_TYPE type) {
+    RestHandler *hr = new RestHandler();
+
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+
+    QNetworkReply *reply;
+    QFile f(ui->commandBox->text());
+
+    if (type == RestHandler::PUT) {
+        if (!f.open(QIODevice::WriteOnly | QIODevice::Text)){
+            return;
+        }
+        QTextStream out(&f);
+        out << ui->textBox->toPlainText();
+        f.close();
+    }
+
+    QNetworkRequest request(hr->makeRequestUrl(type, ui->commandBox->text()));
+    connect(manager, SIGNAL(finished(QNetworkReply*)), SLOT(slotRequestFinished(QNetworkReply*)));
+
+    if (type == RestHandler::PUT)
+    {
+        reply = manager->put(request, f.readAll());
+    }
+    if (type == RestHandler::GET)
+    {
+        //connect(reply, SIGNAL(downloadProgress(qint64,qint64)), SLOT(slotSetProgress(qint64,qint64)));
+        reply = manager->get(request);
+    }
+}
 
 void Window::slotRequestFinished(QNetworkReply *reply){
     QFile f("text.txt");
-    qDebug() << "slotrequestfinished";
     if (reply->error() > 0) {
         qDebug() << reply->errorString();
         qDebug() << reply->readAll();
@@ -130,20 +114,37 @@ void Window::slotRequestFinished(QNetworkReply *reply){
             qDebug() << "Problems opening file";
             return;
         }
-        QTextStream out(&f);
-        QString foo = QString::fromUtf8(reply->readAll());
-        ui->textBox->setText(foo);
-        out << foo;
+        QByteArray foo = reply->readAll();
+
+        QDomDocument doc;
+        QXmlInputSource source;
+
+
+        source.setData(foo);
+        doc.setContent(source.data());
+
+        QDomNodeList list = doc.elementsByTagName("Key");
+        QByteArray sout;
+
+        if (list.size() > 0){
+            int i = 0;
+            for (; i< list.size(); i++){
+                sout.append(list.at(i).toElement().text() + "\n");
+            }
+        } else {
+            sout = foo;
+        }
+
+        ui->textBox->setText(QString::fromUtf8(sout));
+
         f.close();
       }
-    reply->deleteLater();
+   reply->deleteLater();
 }
 
 
 
 void Window::slotSetProgress(qint64 rec, qint64 tot){
-    qDebug() << "From slotSetProgress()";
-
     ui->bar->setMaximum(tot);
     ui->bar->setValue(rec);
 }

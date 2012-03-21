@@ -4,6 +4,7 @@
 #include "qmainwindow.h"
 #include "qnetworkreply.h"
 #include "dialog.h"
+#include "resthandler.h"
 
 namespace Ui {
 class Window;
@@ -17,7 +18,6 @@ public:
     explicit Window(QWidget *parent = 0);
     ~Window();
 
-    
 public slots:
     void on_button_clicked();
     void slotRequestFinished(QNetworkReply *);
@@ -31,9 +31,8 @@ private slots:
 private:
     Ui::Window *ui;
     Dialog *newDialog;
-    QString userName;
-    QString userKey;
-    QString secretKey;
+    void doRequest(RestHandler::REQUEST_TYPE type);
+
 };
 
 #endif // WINDOW_H

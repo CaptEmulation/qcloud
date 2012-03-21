@@ -19,7 +19,6 @@ private:
     QString calculateSignature(QString authkey);
 
 public:
-
     enum REQUEST_TYPE{PUT, GET};
     RestHandler();
     QUrl makeRequestUrl(REQUEST_TYPE type, QString fileName);
