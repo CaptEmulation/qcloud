@@ -31,6 +31,7 @@ const QSettings settings("RestExample", "RestHandler");
 enum REQUEST_TYPE {PUT, GET};
 
 RestHandler::RestHandler(){}
+
 RestHandler::~RestHandler() {
     delete this;
 }

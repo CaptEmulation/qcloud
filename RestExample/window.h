@@ -30,6 +30,7 @@ private slots:
 
 private:
     Ui::Window *ui;
+    RestHandler::RestHandler *rh;
     Dialog *newDialog;
     void doRequest(RestHandler::REQUEST_TYPE type);
 

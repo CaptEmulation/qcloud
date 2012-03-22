@@ -31,7 +31,7 @@
       Does not include ANY error handling so that should be taken care of.
       Generalization of the 'path' so that user first sees his/her buckets and after that
        by choosing what bucket sees whats inside of it.
-
+      Refactoring doRequest to return a QNetworkReply pointer, and placing the method in to the resthandler class
 
   When I get the Azure registration to work, I will try and see what needs to be changed to get the same kind of functions
   to azure.
@@ -68,32 +68,29 @@ void Window::on_sendButton_clicked() {
 }
 
 void Window::doRequest(RestHandler::REQUEST_TYPE type) {
-    RestHandler *hr = new RestHandler();
-
+    rh = new RestHandler();
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-
     QNetworkReply *reply;
-    QFile f(ui->commandBox->text());
 
-    if (type == RestHandler::PUT) {
-        if (!f.open(QIODevice::WriteOnly | QIODevice::Text)){
+    QNetworkRequest request(rh->makeRequestUrl(type, ui->commandBox->text()));
+    connect(manager, SIGNAL(finished(QNetworkReply*)), SLOT(slotRequestFinished(QNetworkReply*)));
+
+    switch (type) {
+    case (RestHandler::PUT): {
+        QFile f(ui->commandBox->text());
+        if (!f.open(QIODevice::ReadWrite | QIODevice::Text)){
             return;
         }
         QTextStream out(&f);
         out << ui->textBox->toPlainText();
+        reply = manager->put(request,f.readAll());
         f.close();
-    }
+        }
+        break;
 
-    QNetworkRequest request(hr->makeRequestUrl(type, ui->commandBox->text()));
-    connect(manager, SIGNAL(finished(QNetworkReply*)), SLOT(slotRequestFinished(QNetworkReply*)));
-
-    if (type == RestHandler::PUT)
-    {
-        reply = manager->put(request, f.readAll());
-    }
-    if (type == RestHandler::GET)
-    {
+    case (RestHandler::GET):
         reply = manager->get(request);
+        break;
     }
 }
 
