@@ -31,9 +31,11 @@ const QSettings settings("RestExample", "RestHandler");
 enum REQUEST_TYPE {PUT, GET};
 
 RestHandler::RestHandler(){}
+RestHandler::~RestHandler() {
+    delete this;
+}
 
-QUrl RestHandler::makeRequestUrl(REQUEST_TYPE type, QString fileName)
-{
+QUrl RestHandler::makeRequestUrl(REQUEST_TYPE type, QString fileName) {
     QString bucket = "kikkare";
     QByteArray url;
     QByteArray stringToSign;
@@ -63,19 +65,19 @@ QUrl RestHandler::makeRequestUrl(REQUEST_TYPE type, QString fileName)
 
 }
 
-qint64 RestHandler::fileSize(QFile &file)
-{
+qint64 RestHandler::fileSize(QFile &file) {
     if (!file.open(QIODevice::ReadWrite))
         return 0;
-    return file.size();
+    quint64 size = file.size();
+    file.close();
+    return size;
 }
 
 /**
   A helper method to create the signature. Did not want to send the secretKey always in every
   method call.
   */
-QString RestHandler::createSignature(QByteArray stringToSign)
-{
+QString RestHandler::createSignature(QByteArray stringToSign) {
     QString hashed = hmacSha1(stringToSign, settings.value("secretKey").toByteArray());
     hashed.replace("/", "%2F");
     hashed.replace("+", "%2B");
@@ -86,8 +88,7 @@ QString RestHandler::createSignature(QByteArray stringToSign)
   * hmac-Sha1 encryption algorithm from http://qt-project.org/wiki/HMAC-SHA1
   * encrypts the signature with the secretKey.
   */
-QString RestHandler::hmacSha1(QByteArray stringToSign, QByteArray secretKey)
-{ 
+QString RestHandler::hmacSha1(QByteArray stringToSign, QByteArray secretKey) {
     int blockSize = 64; // HMAC-SHA-1 block size, defined in SHA-1 standard
     if (secretKey.length() > blockSize) { // if key is longer than block size (64), reduce key length with SHA-1 compression
         secretKey = QCryptographicHash::hash(secretKey, QCryptographicHash::Sha1);

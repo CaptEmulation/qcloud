@@ -16,19 +16,26 @@
 
 /**
   Author: Jarkko Laitinen
-  This is a really alpha version of the software.
+  This is a almost alpha version of the software.
   */
 
 /**
-  Works on a hard coded values atm, will need to do alot of refactoring to generalize the whole thingy. Can now upload a file to a certain bucket in amazon s3
-  and retrieve the same file.
+  This program functions as a broker between the user and the amazon S3 cloud. When the program starts user first has to
+  input his/her own amazon s3 information to the settings menu. After that the program gives availible files from a certain
+  bucket (atm still hardcoded). Then the user inputs what file he wants to the "command prompt" and the program takes care
+  of the rest.
+
   TODO:
       Learning the 'right' way of doing the returning of QStrings and QByteArrays (pointers?)
       Alot of general learning of the c++ way of doing things coming from Java.
       Does not include ANY error handling so that should be taken care of.
-  */
-/**
-  Now includes settings menu where one can enter his/her own amazon s3 credentials and then access the bucket.
+      Generalization of the 'path' so that user first sees his/her buckets and after that
+       by choosing what bucket sees whats inside of it.
+
+
+  When I get the Azure registration to work, I will try and see what needs to be changed to get the same kind of functions
+  to azure.
+
   */
 
 
@@ -50,25 +57,13 @@ Window::Window(QWidget *parent) :
 }
 
 
-Window::~Window()
-{
-    delete ui;
-}
+Window::~Window(){delete ui;}
 
-
-void Window::slotOpenSettingsDialog()
-{
-    newDialog = new Dialog();
-    connect(newDialog, SIGNAL(accepted()), this, SLOT(slotSettingsSaved()));
-    newDialog->show();
-}
-
-void Window::on_button_clicked()
-{
+void Window::on_button_clicked() {
     doRequest(RestHandler::GET);
 }
-void Window::on_sendButton_clicked()
-{
+
+void Window::on_sendButton_clicked() {
     doRequest(RestHandler::PUT);
 }
 
@@ -98,22 +93,17 @@ void Window::doRequest(RestHandler::REQUEST_TYPE type) {
     }
     if (type == RestHandler::GET)
     {
-        //connect(reply, SIGNAL(downloadProgress(qint64,qint64)), SLOT(slotSetProgress(qint64,qint64)));
         reply = manager->get(request);
     }
 }
 
-void Window::slotRequestFinished(QNetworkReply *reply){
-    QFile f("text.txt");
+void Window::slotRequestFinished(QNetworkReply *reply) {
     if (reply->error() > 0) {
         qDebug() << reply->errorString();
         qDebug() << reply->readAll();
       }
       else {
-        if (!f.open(QIODevice::ReadWrite)){
-            qDebug() << "Problems opening file";
-            return;
-        }
+
         QByteArray foo = reply->readAll();
 
         QDomDocument doc;
@@ -136,21 +126,22 @@ void Window::slotRequestFinished(QNetworkReply *reply){
         }
 
         ui->textBox->setText(QString::fromUtf8(sout));
-
-        f.close();
-      }
+        }
    reply->deleteLater();
 }
 
+void Window::slotOpenSettingsDialog() {
+    newDialog = new Dialog();
+    connect(newDialog, SIGNAL(accepted()), this, SLOT(slotSettingsSaved()));
+    newDialog->show();
+}
 
-
-void Window::slotSetProgress(qint64 rec, qint64 tot){
+void Window::slotSetProgress(qint64 rec, qint64 tot) {
     ui->bar->setMaximum(tot);
     ui->bar->setValue(rec);
 }
 
-void Window::slotSettingsSaved(){
-    ui->setupUi(this);
+void Window::slotSettingsSaved() {
     ui->sendButton->setEnabled(true);
     ui->button->setEnabled(true);
     ui->textBox->setText("");
