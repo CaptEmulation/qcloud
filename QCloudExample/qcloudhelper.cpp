@@ -6,12 +6,34 @@
 #include <QUrl>
 #include <QDebug>
 #include <QStringList>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 const QSettings set("JYU", "CloudExample");
 enum REQUEST_TYPE {PUT, GET};
 
 QCloudHelper::QCloudHelper(QObject *parent) : QObject(parent){}
 
+/**
+  At the moment fileName should contain the full canonical address ie. http://kikkare.s3.amazonaws.com/asdfasdf.txt
+  */
+void QCloudHelper::get(QString fileName) {
+    manager = new QNetworkAccessManager(this);
+    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(requestFinished(QNetworkReply*)));
+    QUrl url = makeRequestUrl(GET, fileName);
+    QNetworkRequest request(url);
+    reply = manager->get(request);
+}
+
+void QCloudHelper::put(QFile &file) {
+
+}
+
+
+void QCloudHelper::requestFinished(QNetworkReply *reply) {
+    reply->deleteLater();
+    emit(finished(reply));
+}
 
 /**
   This handles the making of the request urls.

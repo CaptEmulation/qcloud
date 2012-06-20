@@ -29,7 +29,6 @@ void XmlParser::parseListing(QXmlStreamReader *&reader, QTreeWidgetItem *father)
 
                itam->setIcon(0,pixmap);
                father->addChild(itam);
-               qDebug() << "Added child to " << father->text(0) << " with properties " << itam->text(0);
         }
         reader->readNextStartElement();
     }

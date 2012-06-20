@@ -5,11 +5,9 @@
 #include "xmlparser.h"
 #include <QtGui>
 #include <QSettings>
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkReply>
-#include <QtNetwork/QNetworkRequest>
 #include <QXmlInputSource>
 #include <QDomNodeList>
+#include <QNetworkReply>
 #include <QStringList>
 
 
@@ -94,18 +92,11 @@ CloudExample::~CloudExample()
 
 
 void CloudExample::connectOrDisconnect(){
-    if(helper) {
-        //tähän tulevaisuudessa disconnect, eli poistetaan viitteet ja nullaillaan
-    }else{
-        helper = new QCloudHelper();
-    }
-    QNetworkReply *reply;
-    QUrl url = helper->makeRequestUrl(QCloudHelper::GET,ftpServerLineEdit->text());
-    manager = new QNetworkAccessManager(this);
-    QNetworkRequest request(url);
-    connect(manager, SIGNAL(finished(QNetworkReply*)), SLOT(requestFinished(QNetworkReply*)));
-    reply = manager->get(request);
+    helper = new QCloudHelper();
+    connect(helper, SIGNAL(finished(QNetworkReply*)), SLOT(requestFinished(QNetworkReply*)));
+    helper->get(ftpServerLineEdit->text());
 }
+
 /**
   This slot is connected to the QNetworkAccessManagers finished signal.
   */
@@ -138,10 +129,7 @@ void CloudExample::requestFinished(QNetworkReply *reply) {
 void CloudExample::processItem(QTreeWidgetItem *item, int column) {
     QString name = item->text(0);
     if (!checked.contains(name)){
-        QUrl url = helper->makeRequestUrl(QCloudHelper::GET, name + "." + ftpServerLineEdit->text());
-        QNetworkRequest request(url);
-        QNetworkReply *reply;
-        reply = manager->get(request);
+        helper->get(name + "." + ftpServerLineEdit->text());
     }
 }
 
@@ -171,7 +159,6 @@ void CloudExample::populateTree(QXmlInputSource &input){
             foo = matches.at(0);
             parser->parseListing(reader, foo);
         }
-
         if (matches.size() > 0) { fileList->expandItem(matches.at(0));}
     }
 }
@@ -183,15 +170,7 @@ void CloudExample::populateTree(QXmlInputSource &input){
 void CloudExample::downloadFile(){
     fileName = fileList->currentItem()->text(0);
     statusLabel->setText(tr("Downloading file %1").arg(fileName));
-
-    //1 reply = helper.get(fileName); ?
-    //  the three lines of 1. making url 2. making the request 3. creating pointer to a reply are repeated every time.
-    //  Next phase is to place this in the QCloudHelper.
-    QUrl url = helper->makeRequestUrl(QCloudHelper::GET, fileList->currentItem()->parent()->text(0)+"."+ ftpServerLineEdit->text() + "/" + fileName);
-    QNetworkRequest request(url);
-    QNetworkReply *reply;
-    reply = manager->get(request);
-    //1
+    helper->get(fileList->currentItem()->parent()->text(0)+"."+ ftpServerLineEdit->text() + "/" + fileName);
 }
 
 /**
@@ -216,16 +195,16 @@ void CloudExample::fileDownloaded(QByteArray foo) {
   button
   */
 void CloudExample::enableDownloadButton(){
+
     QTreeWidgetItem* current = fileList->currentItem();
     if (current) {
         QString currentFile = current->text(0);
-        QStringList list = currentFile.split(".");
+        QStringList list = currentFile.split(QRegExp("[./"));
         if (list.size() >= 2) {
             downloadButton->setEnabled(true);
         }
     }
     else downloadButton->setEnabled(false);
-
 }
 
 /**
