@@ -24,9 +24,22 @@ void XmlParser::parseListing(QXmlStreamReader *&reader, QTreeWidgetItem *father)
                //tähän parempi kikkare, jotta bucketin sisällä olevat kansiot erottuisivat jotenkin paremmin. esim vaikka niissä olevat
                //tiedostot olisivat kansion lapsia. ATM UGLY HACK
                QString pic = (text.contains("/")) ? (!text.contains(".")) ? ":/images/dir.png" : ":/images/file.png" : ":/images/file.png";
-               QPixmap pixmap(pic);
                //END UGLY HACK
 
+               //Koska DisplayName tulee aina Sizen jälkeen voidaan silmukkaa ajaa niin kauan ja vasta breakata kun displayname ollaan laitettu
+               //QTreeWidgetItemille. Täten saadaan tarvittavat tiedot. readerin ei tulisi ikinä mennä loppuun asti.
+
+               while (!reader->atEnd()) {
+                   reader->readNextStartElement();
+                   if (reader->name().compare("Size",Qt::CaseInsensitive) == 0){
+                        itam->setText(1,reader->readElementText());
+                   }
+                   else if (reader->name().compare("DisplayName",Qt::CaseInsensitive) == 0) {
+                       itam->setText(2, reader->readElementText());
+                       break;
+                   }
+               }
+               QPixmap pixmap(pic);
                itam->setIcon(0,pixmap);
                father->addChild(itam);
         }
@@ -46,6 +59,7 @@ void XmlParser::parseBuckets(QXmlStreamReader *&reader, QTreeWidget *&tree) {
             QPixmap pixmap(":/images/dir.png");
             bucket->setIcon(0,pixmap);
             bucket->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
+            bucket->setText(1,"Bucket");
             tree->addTopLevelItem(bucket);
             reader->readNextStartElement();
         } else {
