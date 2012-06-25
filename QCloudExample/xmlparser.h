@@ -9,8 +9,8 @@ class XmlParser
 {
 public:
     XmlParser();
-    void parseBuckets(QXmlStreamReader *&reader, QTreeWidget *&tree);
-    void parseListing(QXmlStreamReader *&reader, QTreeWidgetItem *father);
+    void parseBuckets(QXmlStreamReader &reader, QTreeWidget &tree);
+    void parseListing(QXmlStreamReader &reader, QTreeWidgetItem *father);
 private:
 };
 

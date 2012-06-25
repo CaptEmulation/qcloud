@@ -148,7 +148,7 @@ void CloudExample::populateTree(QXmlInputSource &input){
     reader->readNext();
 
     if (reader->name().toString().compare("ListAllMyBucketsResult", Qt::CaseInsensitive) == 0) {
-        parser->parseBuckets(reader, fileList);
+        parser->parseBuckets(*reader, *fileList);
     }
     else if (reader->name().toString().compare("ListBucketResult", Qt::CaseInsensitive) == 0) {
         reader->readNext();
@@ -157,7 +157,7 @@ void CloudExample::populateTree(QXmlInputSource &input){
         checked << bucket;
         if(matches.size() > 0) {
             foo = matches.at(0);
-            parser->parseListing(reader, foo);
+            parser->parseListing(*reader, foo);
         }
         if (matches.size() > 0) { fileList->expandItem(matches.at(0));}
     }
