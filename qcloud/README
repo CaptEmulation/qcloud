@@ -26,4 +26,9 @@ Tarkoituksena on myös finisoida taulukoiden säilöminen/hakeminen pilveen.
 
 Yritän tehdä jonkun pienimuotoisen esityksen teille maanantain koodikatselmukseen. 
 
+Ainiin, lisayksena kaytan talla hetkella itse kaannettya Qt 4.8.3 johon olen lisannyt Qt5.0sta
+QCryptographicHash luokan. Taten ohjelmaa ei pysty ajaa normaalilla qt asennuksella. Olen
+miettinyt etta pitaisiko kyseinen muutos kommitoida qtn versionhallintaan?
+
+
 
