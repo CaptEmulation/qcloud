@@ -5,7 +5,7 @@ QCloudTable::QCloudTable()
 }
 
 QCloudTable::QCloudTable(QByteArray *array) {
-    (*array).at(array->length());
+
 }
 
 void QCloudTable::save() {

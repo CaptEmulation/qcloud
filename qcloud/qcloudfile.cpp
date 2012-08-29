@@ -1,24 +1,14 @@
 #include "qcloudfile.h"
 
-QCloudFile::QCloudFile()
-{
-
-}
-
-
 void QCloudFile::save() {
 
 }
 
-QCloudFile::QCloudFile(QByteArray array) {
-    this->contents = array;
-    this->local = true;
-    this->name = name;
-}
 
 QCloudFile::QCloudFile(QString fileName) {
     this->local = false;
     this->name = fileName;
+    this->file = &QFile("filename");
 }
 
 QCloudFile::QCloudFile(QFile &f) {

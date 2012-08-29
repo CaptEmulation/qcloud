@@ -3,8 +3,16 @@
 
 #include "qclouditem.h"
 
+/**
+  Author: Jarkko Laitinen
+  Version: 0.1
+
+  QCloudTable is nofunc at the moment. There is still some decisions to be made before this class is implemented.
+  */
+
 class QCloudTable : public QCloudItem
 {
+    Q_OBJECT
 public:
     QCloudTable();
     QCloudTable(QByteArray* array);

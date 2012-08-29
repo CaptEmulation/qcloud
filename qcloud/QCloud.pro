@@ -5,9 +5,10 @@ QT += core \
     network
 QT -= gui
 TARGET = QCloud
-CONFIG += console
+
+TEMPLATE = lib
 CONFIG -= app_bundle
-TEMPLATE = app
+CONFIG += staticlib
 SOURCES += main.cpp \
     qclouditem.cpp \
     qcloudfile.cpp \

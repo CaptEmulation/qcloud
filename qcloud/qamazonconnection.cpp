@@ -5,15 +5,37 @@
 #include <QDateTime>
 #include <QEventLoop>
 
-QAmazonConnection::QAmazonConnection() {}
-
 QAmazonConnection::QAmazonConnection(QByteArray host, QByteArray user, QByteArray password, QByteArray secret) {
-    this->c.info.insert("host", host);
-    this->c.info.insert("username", user);
-    this->c.info.insert("password", password);
-    this->c.info.insert("secret", secret);
+    this->host = host;
+    this->username = user;
+    this->password = password;
+    this->secret = secret;
     manager = new QNetworkAccessManager(this);
-    reader = new QXmlStreamReader();
+}
+
+QAmazonConnection::~QAmazonConnection() {
+    manager->deleteLater();
+}
+
+bool QAmazonConnection::put(QByteArray &array, QString fileName, QString bucket) {
+    Request r;
+    r.headers.insert("verb", "PUT");
+    r.headers.insert("path", "/"+ bucket + "/");
+    r.headers.insert("fileName", fileName);
+    r.headers.insert("Content-Type", "text/plain");
+    r.headers.insert("fileSize", QByteArray::number(array.size()));
+
+    QNetworkReply *reply;
+    try {
+        reply = sendData(encode(r), array);
+        r.headers.clear();
+    } catch (QString msg) {
+        qDebug() << msg;
+        reply->deleteLater();
+        return false;
+    }
+    reply->deleteLater();
+    return true;
 }
 
 bool QAmazonConnection::put(QCloudFile &f, QString bucket) {
@@ -22,15 +44,16 @@ bool QAmazonConnection::put(QCloudFile &f, QString bucket) {
     r.headers.insert("path", "/" + bucket + "/");
     r.headers.insert("fileName", f.getName());
     r.headers.insert("Content-Type", "text/plain");
-    qDebug() << r.headers.value("fileSize");
 
+    QNetworkReply *reply;
     try {
         reply = sendData(encode(r), f.getContents());
-        headers.clear();
-    } catch (const char* msg){
-        headers.clear();
+        r.headers.clear();
+    } catch (QString msg){
         return false;
+        reply->deleteLater();
     }
+    reply->deleteLater();
     return true;
 }
 
@@ -45,59 +68,34 @@ void QAmazonConnection::replaceUnallowed(QByteArray *array) {
 
 QByteArray* QAmazonConnection::get(QString bucket, QString fileName) {
     Request r;
+    QNetworkReply *reply;
     r.headers.insert("verb", "GET");
     r.headers.insert("path","/" + bucket + "/");
     r.headers.insert("fileName", fileName);
+
     try {
         reply = sendData(encode(r));
+        r.headers.clear();
     } catch (const char* msg) {
         qDebug() << msg;
     }
-
-    headers.clear();
     QByteArray array = reply->readAll();
     reply->deleteLater();
     return &array;
 }
 
-QNetworkReply* QAmazonConnection::sendData(const QNetworkRequest req, const QByteArray &payload) {
-    reply = manager->put(req, payload);
-    QEventLoop loop;
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    if (reply->error() > 0){
-        qDebug() << reply->errorString();
-        throw "Error sending data, with error " + reply->errorString();
-    }
-    loop.deleteLater();
-    return reply;
-}
 
-QNetworkReply* QAmazonConnection::sendData(QNetworkRequest req) {
-    qDebug() << "@ senddata" ;
-    qDebug() << req.rawHeaderList() << " " << req.url();
-    reply = manager->get(req);
-    QEventLoop loop;
-
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec();
-    if (reply->error() > 0) {
-        qDebug() << reply->errorString();
-        throw "Error sending data. Error message: " + reply->errorString();
-    }
-    loop.deleteLater();
-
-    return reply;
-}
 
 QList<QString> QAmazonConnection::getBuckets() {
     Request r;
+    QNetworkReply *reply;
     r.headers.insert("verb", "GET");
     r.headers.insert("path", "/");
 
     reply = sendData(encode(r));
 
     QByteArray msg = reply->readAll();
-    qDebug() << msg;
+
     QList<QString> list = parseBucketListings(&msg);
 
     reply->deleteLater();
@@ -106,8 +104,9 @@ QList<QString> QAmazonConnection::getBuckets() {
 
 
 QList<QString> QAmazonConnection::getBucketContents(QString bucketName) {
-    qDebug() << "from getBucketContents";
     Request r;
+    QNetworkReply *reply;
+
     r.headers.insert("verb", "GET");
     r.headers.insert("path", "/" + bucketName + "/");
     reply = sendData(encode(r));
@@ -121,19 +120,13 @@ QList<QString> QAmazonConnection::getBucketContents(QString bucketName) {
   Creates the request that is then sent to Amazon, everything should be as general as possible and
   this should take care of getting buckets and files.
   */
-QNetworkRequest QAmazonConnection::encode(const Request r) {
+QNetworkRequest QAmazonConnection::encode(const Request &r) {
     QString timeString = QString::number(QDateTime::currentMSecsSinceEpoch()/1000+200);
-    QByteArray stringToSign;
+
     QString path = r.headers.value("path");
+    QByteArray stringToSign = r.headers.value("verb").toAscii() + "\n";
 
-    stringToSign += r.headers.value("verb") + "\n";
-    if (r.headers.contains("Content-Type")){
-        stringToSign += "\n";
-        stringToSign += r.headers.value("Content-Type") + "\n";
-    } else {
-         stringToSign += "\n\n";
-    }
-
+    stringToSign += "\n\n";
     stringToSign += timeString + "\n";
     stringToSign += path;
     if (r.headers.contains("fileName")) {
@@ -142,20 +135,20 @@ QNetworkRequest QAmazonConnection::encode(const Request r) {
     QUrl url;
     qDebug() << stringToSign;
     if (r.headers.contains("fileName")) {
-        url = QUrl("http://" + path.replace("/", "") + "." + this->c.info.value("host")+"/" + r.headers.value("fileName"));
+        url = QUrl("http://" + path.replace("/", "") + "." + this->host +"/" + r.headers.value("fileName"));
     } else if ( r.headers.value("path") != "/"){
-        url = QUrl("http://" + path.replace("/", "") + "." + this->c.info.value("host")+"/");
+        url = QUrl("http://" + path.replace("/", "") + "." + this->host +"/");
     } else {
-        url = QUrl("http://" + this->c.info.value("host") + "/");
+        url = QUrl("http://" + this->host + "/");
     }
 
-    QByteArray hashedSignature = HmacSHA::hash(HmacSHA::HmacSHA1, stringToSign, this->c.info.value("secret"));
+    QByteArray hashedSignature = HmacSHA::hash(HmacSHA::HmacSHA1, stringToSign, this->secret);
+
 
     replaceUnallowed(&hashedSignature);
-
     QNetworkRequest req;
 
-    url.addEncodedQueryItem("AWSAccessKeyId", this->c.info.value("password"));
+    url.addEncodedQueryItem("AWSAccessKeyId", this->password);
     url.addEncodedQueryItem("Signature", hashedSignature);
     if(r.headers.value("verb") == "PUT") {
         url.addEncodedQueryItem("Content-Type", r.headers.value("Content-Type").toAscii());
@@ -163,15 +156,46 @@ QNetworkRequest QAmazonConnection::encode(const Request r) {
     }
     url.addEncodedQueryItem("Expires", timeString.toAscii());
     req.setUrl(url);
+
     return req;
 }
 
+QNetworkReply* QAmazonConnection::sendData(const QNetworkRequest &req, const QByteArray &payload) {
+    QNetworkReply *reply;
+    reply = manager->put(req, payload);
+    QEventLoop loop;
+
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+    if (reply->error() > 0){
+        qDebug() << reply->readAll();
+        throw "Error sending data, with error " + reply->errorString();
+    }
+    loop.deleteLater();
+    return reply;
+}
+
+QNetworkReply* QAmazonConnection::sendData(const QNetworkRequest &req) {
+    QNetworkReply *reply;
+    reply = manager->get(req);
+    QEventLoop loop;
+
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+    if (reply->error() > 0) {
+        throw "Error sending data. Error message: " + reply->errorString();
+    }
+    loop.deleteLater();
+
+    return reply;
+}
 
 /**
   Will be changed to use QVector<QCloudBucket> tahi QVector<QCloudBucket *>, and there will be a
   matching parseBucketContentsListing().
   */
 QList<QString> QAmazonConnection::parseBucketListings(QByteArray *message){
+    QXmlStreamReader *reader = new QXmlStreamReader();
     reader->addData(*message);
     QList<QString> list;
     while (!reader->atEnd()) {
@@ -180,12 +204,12 @@ QList<QString> QAmazonConnection::parseBucketListings(QByteArray *message){
             list.append(reader->readElementText());
         }
     }
-    reader->clear();
-
+    reader->~QXmlStreamReader();
     return list;
 }
 
 QList<QString> QAmazonConnection::parseBucketContentListing(QByteArray *message) {
+    QXmlStreamReader *reader = new QXmlStreamReader();
     reader->addData(*message);
     QList<QString> files;
     while (!reader->atEnd()) {
@@ -194,6 +218,6 @@ QList<QString> QAmazonConnection::parseBucketContentListing(QByteArray *message)
             files.append(reader->readElementText());
         }
     }
-    reader->clear();
+    reader->~QXmlStreamReader();
     return files;
 }
