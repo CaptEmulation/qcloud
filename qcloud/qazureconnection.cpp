@@ -44,6 +44,13 @@ QString QAzureConnection::dateInRFC1123() {
     return httpDate;
 }
 
+bool QAzureConnection::deleteBlob(QString name, QString bucket) {
+    return true;
+}
+
+bool QAzureConnection::deleteBucket(QString bucket) {
+    return true;
+}
 
 bool QAzureConnection::put(QByteArray &array, QString fileName, QString bucket) {
     Request r;
@@ -52,7 +59,7 @@ bool QAzureConnection::put(QByteArray &array, QString fileName, QString bucket) 
     r.headers.insert("verb", "PUT\n");
     r.headers.insert("path", "/" + bucket + "/" + fileName);
     r.headers.insert("size", QByteArray::number(array.size()));
-
+    r.headers.insert("bucket", bucket);
     reply = sendData(encode(r), array);
     if (reply->error() > 0) {
         return false;
@@ -66,7 +73,7 @@ bool QAzureConnection::put(QCloudFile &f, QString bucket) {
     r.headers.insert("verb", "PUT\n");
     r.headers.insert("path", "/" + bucket + "/" + f.getName());
     r.headers.insert("size", QByteArray::number(f.getSize()));
-
+    r.headers.insert("bucket", bucket);
     reply = sendData(encode(r), f.getContents());
     r.headers.clear();
     if (reply->error() > 0) {
@@ -119,7 +126,7 @@ QByteArray* QAzureConnection::get(QString bucket, QString name){
 
     r.headers.insert("verb", "GET\n");
     r.headers.insert("path", "/" + bucket + "/" + name);
-
+    r.headers.insert("bucket", bucket);
     reply = sendData(encode(r));
     QByteArray *info = new QByteArray(reply->readAll());
     reply->deleteLater();
@@ -136,7 +143,6 @@ bool QAzureConnection::createContainer(QString name) {
 
     reply = sendData(encode(r), QByteArray(""));
     r.headers.clear();
-
 
     if (reply->error() > 0) {
         reply->deleteLater();
@@ -228,27 +234,25 @@ QNetworkReply* QAzureConnection::sendData(const QNetworkRequest &req, const QByt
 
 //PARSERS
 QList<QString> QAzureConnection::parseBucketListing(QByteArray &contents) {
-    QXmlStreamReader *reader = new QXmlStreamReader();
-    reader->addData(contents);
+    QXmlStreamReader reader;
+    reader.addData(contents);
     QList<QString> foo;
-    while (!reader->atEnd()) {
-        reader->readNextStartElement();
-        if (reader->name().toString() == "Name") {
-            foo.append(reader->readElementText());
+    while (!reader.atEnd()) {
+        reader.readNextStartElement();
+        if (reader.name().toString() == "Name") {
+            foo.append(reader.readElementText());
         }
     }
-    reader->~QXmlStreamReader();
     return foo;
 }
 
 QList<QString> QAzureConnection::parseBucketContentsListing(QByteArray &contents) {
-    QXmlStreamReader *reader = new QXmlStreamReader();
+    QXmlStreamReader reader;
     QList<QString> foo;
-    reader->addData(contents);
-    while (!reader->atEnd()) {
-        reader->readNextStartElement();
-        if (reader->name().toAscii() == "Name") foo.append(reader->readElementText());
+    reader.addData(contents);
+    while (!reader.atEnd()) {
+        reader.readNextStartElement();
+        if (reader.name().toAscii() == "Name") foo.append(reader.readElementText());
     }
-    reader->~QXmlStreamReader();
     return foo;
 }

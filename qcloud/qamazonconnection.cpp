@@ -17,6 +17,14 @@ QAmazonConnection::~QAmazonConnection() {
     manager->deleteLater();
 }
 
+bool QAmazonConnection::deleteBlob(QString name, QString bucket) {
+    return true;
+}
+
+bool QAmazonConnection::deleteBucket(QString bucket) {
+    return true;
+}
+
 bool QAmazonConnection::put(QByteArray &array, QString fileName, QString bucket) {
     Request r;
     r.headers.insert("verb", "PUT");
@@ -29,13 +37,13 @@ bool QAmazonConnection::put(QByteArray &array, QString fileName, QString bucket)
     try {
         reply = sendData(encode(r), array);
         r.headers.clear();
+        reply->deleteLater();
+        return true;
     } catch (QString msg) {
         qDebug() << msg;
         reply->deleteLater();
         return false;
     }
-    reply->deleteLater();
-    return true;
 }
 
 bool QAmazonConnection::put(QCloudFile &f, QString bucket) {
@@ -44,17 +52,18 @@ bool QAmazonConnection::put(QCloudFile &f, QString bucket) {
     r.headers.insert("path", "/" + bucket + "/");
     r.headers.insert("fileName", f.getName());
     r.headers.insert("Content-Type", "text/plain");
+    r.headers.insert("fileSize", QByteArray::number(f.getSize()));
 
     QNetworkReply *reply;
     try {
         reply = sendData(encode(r), f.getContents());
         r.headers.clear();
+        reply->deleteLater();
+        return true;
     } catch (QString msg){
         return false;
         reply->deleteLater();
     }
-    reply->deleteLater();
-    return true;
 }
 
 bool QAmazonConnection::put(QCloudTable &table) {
@@ -76,12 +85,13 @@ QByteArray* QAmazonConnection::get(QString bucket, QString fileName) {
     try {
         reply = sendData(encode(r));
         r.headers.clear();
+        QByteArray *array = new QByteArray(reply->readAll());
+        reply->deleteLater();
+        return array;
     } catch (const char* msg) {
         qDebug() << msg;
+        return new QByteArray("");
     }
-    QByteArray array = reply->readAll();
-    reply->deleteLater();
-    return &array;
 }
 
 
@@ -133,7 +143,7 @@ QNetworkRequest QAmazonConnection::encode(const Request &r) {
         stringToSign += r.headers.value("fileName");
     }
     QUrl url;
-    qDebug() << stringToSign;
+
     if (r.headers.contains("fileName")) {
         url = QUrl("http://" + path.replace("/", "") + "." + this->host +"/" + r.headers.value("fileName"));
     } else if ( r.headers.value("path") != "/"){
@@ -195,29 +205,27 @@ QNetworkReply* QAmazonConnection::sendData(const QNetworkRequest &req) {
   matching parseBucketContentsListing().
   */
 QList<QString> QAmazonConnection::parseBucketListings(QByteArray *message){
-    QXmlStreamReader *reader = new QXmlStreamReader();
-    reader->addData(*message);
+    QXmlStreamReader reader;
+    reader.addData(*message);
     QList<QString> list;
-    while (!reader->atEnd()) {
-        reader->readNextStartElement();
-        if (reader->name().toString() == "Name"){
-            list.append(reader->readElementText());
+    while (!reader.atEnd()) {
+        reader.readNextStartElement();
+        if (reader.name().toString() == "Name"){
+            list.append(reader.readElementText());
         }
     }
-    reader->~QXmlStreamReader();
     return list;
 }
 
 QList<QString> QAmazonConnection::parseBucketContentListing(QByteArray *message) {
-    QXmlStreamReader *reader = new QXmlStreamReader();
-    reader->addData(*message);
+    QXmlStreamReader reader;
+    reader.addData(*message);
     QList<QString> files;
-    while (!reader->atEnd()) {
-        reader->readNext();
-        if (reader->name().toString() == "Key") {
-            files.append(reader->readElementText());
+    while (!reader.atEnd()) {
+        reader.readNext();
+        if (reader.name().toString() == "Key") {
+            files.append(reader.readElementText());
         }
     }
-    reader->~QXmlStreamReader();
     return files;
 }

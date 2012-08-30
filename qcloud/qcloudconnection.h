@@ -71,6 +71,17 @@ public:
     struct Request {
         QHash<QString, QString> headers;
     };
+
+    /**
+      Deletes mentioned blob from the wanted bucket.
+      */
+    virtual bool deleteBlob(QString name, QString bucket) = 0;
+
+    /**
+      Deletes bucket from the account.
+      */
+    virtual bool deleteBucket(QString bucket) = 0;
+
 private:
     /**
       sendData uses QNetworkAccessManager to send and receive data from the cloud. Errors in the request are inside the QNetworkReply

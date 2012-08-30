@@ -8,7 +8,7 @@ void QCloudFile::save() {
 QCloudFile::QCloudFile(QString fileName) {
     this->local = false;
     this->name = fileName;
-    this->file = &QFile("filename");
+    this->file = new QFile(fileName);
 }
 
 QCloudFile::QCloudFile(QFile &f) {

@@ -16,7 +16,10 @@ class QCloudFile : public QCloudItem
 {
     Q_OBJECT
 public:
-
+    /**
+      When creating QCloudFile using the constructor that takes QFile as a parameter it reads the contents of the
+      file to a byte array inside the QCloudFile
+      */
     QCloudFile(QFile &f);
     QCloudFile(QString fileName);
 

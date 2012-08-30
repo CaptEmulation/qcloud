@@ -45,6 +45,8 @@ public:
     virtual bool put(QByteArray &array, QString fileName, QString bucket);
     virtual QList<QString> getBuckets();
     virtual QList<QString> getBucketContents(QString bucketName);
+    virtual bool deleteBlob(QString name, QString bucket);
+    virtual bool deleteBucket(QString bucket);
 
     virtual QByteArray* get(QString bucket, QString name);
 
