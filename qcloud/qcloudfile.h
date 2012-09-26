@@ -22,14 +22,17 @@ public:
       */
     QCloudFile(QFile &f);
     QCloudFile(QString fileName);
-
+    QCloudFile(QByteArray contents, QString fileName);
+    QCloudFile(QByteArray contents, QString fileName, QString bucket);
     void save();
     virtual bool isLocal();
     QString getName();
     void setName(QString name);
     qint64 getSize();
     QByteArray getContents();
-
+    QFile* getFile();
+    void setLocal();
+    void setContents(const QByteArray &contents);
 private:
     QFile *file;
     QByteArray contents;

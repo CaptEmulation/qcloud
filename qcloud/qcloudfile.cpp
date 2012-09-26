@@ -5,11 +5,57 @@ void QCloudFile::save() {
 }
 
 
+void QCloudFile::setLocal() {
+    this->local = true;
+}
+
+void QCloudFile::setContents(const QByteArray &contents) {
+    this->contents = contents;
+}
+
 QCloudFile::QCloudFile(QString fileName) {
     this->local = false;
     this->name = fileName;
     this->file = new QFile(fileName);
 }
+
+QCloudFile::QCloudFile(QByteArray contents, QString fileName) {
+    this->contents = contents;
+    QFile f(fileName);
+    if (f.exists()) {
+        qDebug() << "file exists so overwriting";
+        f.remove();
+    }
+
+    if (!f.open(QIODevice::ReadWrite | QFile::Text)) {
+        qDebug() << "complications opening the file";
+    }
+    f.write(contents);
+    f.close();
+
+    this->file = new QFile(fileName);
+}
+
+QCloudFile::QCloudFile(QByteArray contents, QString fileName, QString bucket)
+{
+    this->contents = contents;
+    QString filepath = bucket + "/" + fileName;
+    qDebug() << filepath;
+    QFile f(filepath);
+
+    if (f.exists()) {
+        qDebug() << "file exists so overwriting";
+        f.remove();
+    }
+
+    if (!f.open(QIODevice::ReadWrite | QFile::Text)) {
+        qDebug() << "complications opening the file";
+    }
+    f.write(contents);
+    f.close();
+    this->file = new QFile(fileName);
+}
+
 
 QCloudFile::QCloudFile(QFile &f) {
     QFileInfo fileInfo(f);
@@ -45,3 +91,8 @@ qint64 QCloudFile::getSize() {
 void QCloudFile::setName(QString name) {
     this->name = name;
 }
+
+QFile* QCloudFile::getFile() {
+    return this->file;
+}
+

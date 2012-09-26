@@ -5,6 +5,9 @@
 #include "qclouditem.h"
 #include <QEventLoop>
 #include <QXmlStreamReader>
+#include "qcloudresponse.h"
+#include "qclouddir.h"
+#include <QNetworkReply>
 
 /**
   Author: Jarkko Laitinen
@@ -28,10 +31,6 @@ public:
       */
     QAzureConnection(QByteArray url, QByteArray authentication, QByteArray storageKey);
 
-    /**
-      Documentation for the inherited functions can be found from QCloudConnection.
-      */
-    virtual QByteArray* get(QString name);
 
     /**
       At the moment this is nofunc as it always returns false.
@@ -42,26 +41,31 @@ public:
       put(QCloudTable) is nofunc at the moment.
       */
     virtual bool put(QCloudTable &table);
-    virtual bool put(QByteArray &array, QString fileName, QString bucket);
-    virtual QList<QString> getBuckets();
-    virtual QList<QString> getBucketContents(QString bucketName);
+    virtual bool put(QCloudDir &dir);
+    virtual QList<QString> getCloudDir();
+    virtual QList<QString> getCloudDirContents(QString bucketName);
     virtual bool deleteBlob(QString name, QString bucket);
-    virtual bool deleteBucket(QString bucket);
+    virtual bool deleteCloudDir(QString bucket);
 
-    virtual QByteArray* get(QString bucket, QString name);
+
+    virtual QCloudFile* get(QString bucket, QString name);
+    virtual bool get(QCloudDir &d);
+    virtual bool cloudDirExists(const QString &dirName);
+    virtual  bool createCloudDir(const QString &dirName);
+
+private:
+
+    virtual QNetworkRequest encode(const Request &r);
+    virtual QNetworkReply* sendPut(const QNetworkRequest &req, const QByteArray &payload);
+    virtual QNetworkReply* sendGet(const QNetworkRequest &req);
+    virtual QNetworkReply* sendHead(const QNetworkRequest &req);
+    virtual QList<QString> parseCloudDirListings(QByteArray &contents);
+    QList<QString> parseCloudDirContentsListing(QByteArray &reply);
 
     /**
       A helperfunction to ease the creation of containers in Azure.
       */
-    bool createContainer(QString name);
 
-private:
-    virtual QNetworkRequest encode(const Request &r);
-    virtual QNetworkReply* sendData(const QNetworkRequest &req, const QByteArray &payload);
-    virtual QNetworkReply* sendData(const QNetworkRequest &req);
-
-    QList<QString> parseBucketListing(QByteArray &contents);
-    QList<QString> parseBucketContentsListing(QByteArray &reply);
 
     /**
       Azure requires dateTimes in RFC1123 format that is not supported by Qt's QDateTime at the moment. This helperfunction
@@ -84,12 +88,31 @@ private:
     void initializeHeaders();
     void initializeSharedKeyLiteHeaders();
 
+    virtual QCloudResponse::RESPONSETYPE findType(QNetworkReply &reply, QByteArray &contents);
+
+    virtual void setOverrideLocal(bool value);
+    virtual void setOverrideCloud(bool value);
+
     Headers head;
 
     QNetworkAccessManager *manager;
     QByteArray url;
-    QByteArray authentication;
+    QByteArray storageAccountName;
     QByteArray storageKey;
+    QByteArray authentication;
+
+    bool overrideLocal;
+    bool overrideCloud;
+
+signals:
+    void valueChanged(int);
+    void setRange(int,int);
+
+private slots:
+    virtual void requestFinished(QNetworkReply*);
+    virtual void getCloudDirFinished(QNetworkReply*);
+    virtual void getCloudDirContentsFinished(QNetworkReply*);
+    virtual void getCloudFileFinished(QNetworkReply*);
 };
 
 #endif // QAZURECONNECTION_H

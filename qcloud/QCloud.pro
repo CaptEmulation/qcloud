@@ -9,21 +9,23 @@ TARGET = QCloud
 TEMPLATE = lib
 CONFIG -= app_bundle
 CONFIG += staticlib
-SOURCES += main.cpp \
+LIBS += qcloud.lib
+SOURCES += \
     qclouditem.cpp \
     qcloudfile.cpp \
     qcloudtable.cpp \
     qcloudconnection.cpp \
     qamazonconnection.cpp \
-    qcloudbucket.cpp \
     qazureconnection.cpp \
-    hmacsha.cpp
+    hmacsha.cpp \
+    qclouddir.cpp \
+    qcloudresponse.cpp
 HEADERS += qclouditem.h \
     qcloudfile.h \
     qcloudtable.h \
     qcloudconnection.h \
     qamazonconnection.h \
-    main.h \
-    qcloudbucket.h \
     qazureconnection.h \
-    hmacsha.h
+    hmacsha.h \
+    qclouddir.h \
+    qcloudresponse.h
