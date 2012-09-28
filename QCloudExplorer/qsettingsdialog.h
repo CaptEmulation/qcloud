@@ -46,6 +46,7 @@ private:
     QPushButton *cancelButton;
     QCheckBox *overrideCloud;
     QCheckBox *overrideLocal;
+    QCheckBox *onlyNewer;
 };
 
 #endif // QSETTINGSDIALOG_H

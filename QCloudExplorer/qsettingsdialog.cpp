@@ -93,6 +93,12 @@ QSettingsDialog::QSettingsDialog(QWidget *parent) :
         overrideLocal->setChecked(true);
     }
 
+    onlyNewer = new QCheckBox();
+    onlyNewer->setText("Sync newer");
+    if (s.contains("keepnewer")) {
+        onlyNewer->setChecked(true);
+    }
+
     foo->addWidget(overrideCloud);
     foo->addWidget(overrideLocal);
 

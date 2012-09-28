@@ -57,17 +57,17 @@ bool QAzureConnection::cloudDirExists(const QString &dirName) {
     Request r;
     QNetworkReply *reply;
 
-    r.headers.insert("verb", "HEAD");
-    r.headers.insert("bucket", dirName);
-    r.headers.insert("path","");
+    r.headers.insert("verb", "GET");
+    r.headers.insert("path", "/" + dirName);
+    r.headers.insert("operation", "comp=metadata&restype=container");
 
-    reply = sendHead(encode(r));
+    reply = sendGet(encode(r));
 
     //If the cloudDir does not exist in cloud the response is 404 or 403.
     //Azure does not provide a API-call for checking the existance of containers.
 
     if (reply->error() != 0) {
-         return false;
+        return false;
     }
     return true;
 }
@@ -78,11 +78,15 @@ bool QAzureConnection::createCloudDir(const QString &name) {
     r.headers.insert("verb", "PUT");
     r.headers.insert("path", "/" + name);
     r.headers.insert("operation", "restype=container");
+    r.headers.insert("size", "0");
 
     reply = sendPut(encode(r), QByteArray(""));
     r.headers.clear();
 
     if (reply->error() > 0) {
+        qDebug() << QString("Problems creating cloudDir %1 to the cloud").arg(name);
+        qDebug() << reply->errorString();
+        qDebug() << reply->readAll();
         reply->deleteLater();
         return false;
     }
@@ -115,9 +119,13 @@ bool QAzureConnection::put(QCloudDir &dir) {
     QList<QString> contents = dir.getCloudDirContentsAsString();
     int size = contents.size();
     QString path = dir.getPath();
+    if (!cloudDirExists(path)) {
+        createCloudDir(path);
+        qDebug() << QString("Created container %1 to azure").arg(path);
+    }
     emit setRange(0, size);
     if (!overrideCloud) {
-        QList<QString> cloudContents = getCloudDirContents(dir.getPath());
+        QList<QString> cloudContents = getCloudDirContents(path);
         for (int i = 0; i < size; i++) {
             if (!cloudContents.contains(contents.at(i))) {
                 put((*dir.get(i)), path);
@@ -137,24 +145,38 @@ bool QAzureConnection::put(QCloudDir &dir) {
 }
 
 bool QAzureConnection::get(QCloudDir &d) {
-    QList<QString> contents = d.getCloudDirContentsAsString();
-    int size = contents.size();
     QString path = d.getPath();
-    emit setRange(0, size);
-
-    if(!overrideLocal) {
-        QList<QString> cloudContents = getCloudDirContents(d.getPath());
-        int cloudsize = cloudContents.size();
-        for (int i = 0; i < cloudsize; i++) {
-            if (!contents.contains(cloudContents.at(i))) {
-                get(path, cloudContents.at(i));
+    QList<QString> contents;
+    int size;
+    if (d.isLocal()) {
+        contents = d.getCloudDirContentsAsString();
+        size = contents.size();
+        emit setRange(0, size);
+        if(!overrideLocal) {
+            QList<QString> cloudContents = getCloudDirContents(d.getPath());
+            int cloudsize = cloudContents.size();
+            for (int i = 0; i < cloudsize; i++) {
+                if (!contents.contains(cloudContents.at(i))) {
+                    get(path, cloudContents.at(i));
+                    emit valueChanged(i);
+                }
+            }
+        } else {
+                for (int i = 0; i < size; i++){
+                get(path, d.get(i)->getName());
+                emit valueChanged(i);
             }
         }
     } else {
-            for (int i = 0; i < size; i++){
-            get(path, d.get(i)->getName());
+        contents = getCloudDirContents(path);
+        size = contents.size();
+        emit setRange(0, size);
+        for (int i = 0; i < contents.length(); i++){
+            get(path, contents.at(i));
+            emit valueChanged(i);
         }
     }
+    emit getCloudDirFinished();
     return true;
 }
 
@@ -208,7 +230,7 @@ QNetworkRequest QAzureConnection::encode(const Request &r) {
     QString urlString("http://");
 
     //Tämä uusiksi, rumaa rumaa rumaa.
-    if (r.headers.value("verb") == "PUT") urlString += this->url + r.headers.value("path");
+    if (r.headers.value("verb") == "PUT" && !r.headers.contains("operation")) urlString += this->url + r.headers.value("path");
     else if (r.headers.contains("path") && r.headers.contains("operation")) urlString += this->url + r.headers.value("path") + "?" +r.headers.value("operation");
     else if (r.headers.value("verb") == "GET" && !r.headers.contains("operation")) urlString += this->url + r.headers.value("path");
     else urlString += this->url + "?" + r.headers.value("operation");
@@ -232,7 +254,7 @@ QNetworkRequest QAzureConnection::encode(const Request &r) {
 
     QString date = dateInRFC1123();
 
-    if (r.headers.contains("size")) {
+    if (r.headers.contains("size") /*&& !r.headers.value("operation").contains("restype")*/) {
        stringToSign += "\nx-ms-blob-type:BlockBlob";
     }
     stringToSign += "\nx-ms-date:" + date;
@@ -256,6 +278,7 @@ QNetworkRequest QAzureConnection::encode(const Request &r) {
         req.setRawHeader("Content-Length", r.headers.value("size").toAscii());
         req.setRawHeader("x-ms-blob-type", "BlockBlob");
     }
+    qDebug() << stringToSign;
     return req;
 }
 
@@ -330,17 +353,6 @@ QList<QString> QAzureConnection::parseCloudDirContentsListing(QByteArray &conten
 
 //SLOTS
 
-void QAzureConnection::getCloudDirContentsFinished(QNetworkReply *) {
-
-}
-
-void QAzureConnection::getCloudDirFinished(QNetworkReply *) {
-
-}
-
-void QAzureConnection::getCloudFileFinished(QNetworkReply *) {
-
-}
 
 void QAzureConnection::requestFinished(QNetworkReply *) {
 

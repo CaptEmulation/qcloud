@@ -162,5 +162,6 @@ void MainWindow::updateLocal() {
 }
 
 void MainWindow::updateCloud() {
-
+    QList<QString> list = cloud->getCloudDir();
+    ui->cloudDirectory->setModel(new QStringListModel(list));
 }

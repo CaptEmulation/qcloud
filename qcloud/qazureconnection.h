@@ -110,9 +110,6 @@ signals:
 
 private slots:
     virtual void requestFinished(QNetworkReply*);
-    virtual void getCloudDirFinished(QNetworkReply*);
-    virtual void getCloudDirContentsFinished(QNetworkReply*);
-    virtual void getCloudFileFinished(QNetworkReply*);
 };
 
 #endif // QAZURECONNECTION_H

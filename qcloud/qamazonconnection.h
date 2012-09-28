@@ -73,6 +73,7 @@ private:
       Finds the type of the reply from the reply and places it contents to contents, does not delete the QNetworkReply
       */
     virtual QCloudResponse::RESPONSETYPE findType(QNetworkReply &reply, QByteArray &contents);
+
     QNetworkAccessManager *manager;
     QByteArray host;
     QByteArray username;
