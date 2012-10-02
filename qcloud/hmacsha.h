@@ -5,11 +5,14 @@
 #include <QCryptographicHash>
 #include <QDebug>
 
-/**
-  Author: Jarkko Laitinen
+/*!
+  \author Jarkko Laitinen
+  \class HMacSha
+  \brief Does HMAC hashes with SHA1 and SHA256 encryptions.
 
+  \reentrant
   HmacSHA class provides the hash function that is needed to make hases of the stringToSign arrays. These
-  are used to verify the senders identity. HmacSHA uses the QCryptographicHash from Qt5 so a custom
+  are used to verify the senders identity. HmacSHA uses the \l{QCryptographicHash} from Qt5 so a custom
   installation of Qt 4.8.3 is required. I will commit the backported version to Qt master soon.
   */
 class HmacSHA : public QObject

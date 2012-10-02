@@ -14,17 +14,9 @@ class QAmazonConnection : public QCloudConnection
 {
     Q_OBJECT
 public:
-    /**
-      Deconstructor, deletes allocated objects
-     */
     ~QAmazonConnection();
 
-    /**
-      Constructor, parameters are as follows: host = the adress where the requests are sent, i.e. s3.amazonaws.com
-                                              user = username in the service
-                                              password = AWSAccessKeyId
-                                              secret = the secret key obtained from the service
-      */
+
     QAmazonConnection(QByteArray user, QByteArray password, QByteArray secret);
 
     /**
@@ -34,20 +26,25 @@ public:
     virtual QCloudFile* get(QString bucket, QString fileName);
     virtual bool get(QCloudDir &d);
     virtual bool put(QCloudFile &f, QString bucket);
-    virtual bool put(QCloudTable &table);
     virtual bool put(QCloudDir &d);
     virtual QList<QString> getCloudDir();
     virtual QList<QString> getCloudDirContents(QString bucketName);
     virtual bool deleteBlob(QString name, QString bucket);
     virtual bool deleteCloudDir(QString bucket);
 
-    /**
+    /*!
+      \fn QAmazonConnection::parseCloudDirContentListing()
+      \brief Parses message received from cloud and returns a list of blobs in a clouddir.
+
       Parser method that returns a list of strings that contain the files included in the getBucketContents()
       response.
       */
     QList<QString> parseCloudDirContentListing(QByteArray *array);
 
-    /**
+    /*!
+      \fn QAmazonConnection::parseCLoudDirListing
+      \brief Takes an Bytearray containing the reply from cloud and returns a list of qclouddirs in the cloud.
+
       Parser method that uses QXmlStreamReader to find the buckets from getBuckets() listing. Returns list of the
       buckets in the users account.
       */
@@ -61,7 +58,11 @@ private:
     virtual QNetworkReply* sendGet(const QNetworkRequest &req);
     virtual QNetworkReply* sendPut(const QNetworkRequest &req, const QByteArray &payload);
     virtual QNetworkReply* sendHead(const QNetworkRequest &req);
-    /**
+
+    /*!
+      \fn QAmazonConnection::replaceUnallowed
+      \brief replaces / and + with their encoded values.
+
       Amazon defines that + and / should be replaced from the hashed to %2F and %2B. This function
       takes a pointer to the array and replaces the occurances.
       */
@@ -69,7 +70,10 @@ private:
 
 
 
-    /**
+    /*!
+      \fn QAmazonConnection::findType
+      \brief Finds the type of request from the reply
+
       Finds the type of the reply from the reply and places it contents to contents, does not delete the QNetworkReply
       */
     virtual QCloudResponse::RESPONSETYPE findType(QNetworkReply &reply, QByteArray &contents);

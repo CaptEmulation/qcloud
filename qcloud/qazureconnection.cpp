@@ -5,6 +5,20 @@ QAzureConnection::~QAzureConnection() {
     manager->deleteLater();
 }
 
+/*!
+  \class QAzureConnection
+  \inherits QCloudConnection
+
+  \brief Implementation of the interface QCloudConnection for Azure.
+
+
+  Constructor to create new QAzureConnections. This contains three parameters and all should be in the right format.
+  The first parameter is QByteArray containing the url of the service i.e. "http://kikkare.blob.core.windows.net" where
+  kikkare is the storage accounts name. Authentication contains either SharedKey or SharedKeyLite. At the moment, this
+  library has better support for SharedKey authentication. storageKey parameter should be made with QByteArray::fromBase64()
+  as the key provided by Microsoft is Base64 encoded. The constructor also creates a new Headers-struct according to the
+  provided authentication type.
+  */
 QAzureConnection::QAzureConnection(QByteArray url, QByteArray storageAccountName, QByteArray storageKey) {
     this->url = url;
     this->storageAccountName = storageAccountName;
@@ -13,6 +27,9 @@ QAzureConnection::QAzureConnection(QByteArray url, QByteArray storageAccountName
     initializeHeaders();
 }
 
+/*!
+    \fn QAzureConnection::initializeHeaders()
+    \brief Initializes headers used in the signing of SharedKey requests */
 void QAzureConnection::initializeHeaders() {
     this->head.requiredHeaders.append(qMakePair(QString("Content-Encoding"), QString("\n")));
     this->head.requiredHeaders.append(qMakePair(QString("Content-Language"), QString("\n")));
@@ -27,6 +44,9 @@ void QAzureConnection::initializeHeaders() {
     this->authentication = "SharedKey";
 }
 
+/*!
+  \brief Initializes headers to be used with SharedKeyLite requests.
+*/
 void QAzureConnection::initializeSharedKeyLiteHeaders() {
     this->head.requiredHeaders.append(qMakePair(QString("Content-MD5"), QString("\n")));
     this->head.requiredHeaders.append(qMakePair(QString("Content-Type"), QString("\n")));
@@ -34,6 +54,10 @@ void QAzureConnection::initializeSharedKeyLiteHeaders() {
     this->authentication = "SharedKeyLite";
 }
 
+/*!
+  \brief Azure requires dates to be in RFC1123 format that Qt's QDateTime does not provide,
+  so this helper provides it.
+  */
 QString QAzureConnection::dateInRFC1123() {
     QString httpDate;
     QDateTime dDate = QDateTime::currentDateTimeUtc();
@@ -45,14 +69,23 @@ QString QAzureConnection::dateInRFC1123() {
     return httpDate;
 }
 
+/*!
+ \reimp
+  */
 bool QAzureConnection::deleteBlob(QString name, QString bucket) {
     return true;
 }
 
+/*!
+  \reimp
+  */
 bool QAzureConnection::deleteCloudDir(QString bucket) {
     return true;
 }
 
+/*!
+  \reimp
+  */
 bool QAzureConnection::cloudDirExists(const QString &dirName) {
     Request r;
     QNetworkReply *reply;
@@ -72,6 +105,9 @@ bool QAzureConnection::cloudDirExists(const QString &dirName) {
     return true;
 }
 
+/*!
+  \reimp
+  */
 bool QAzureConnection::createCloudDir(const QString &name) {
     Request r;
     QNetworkReply *reply;
@@ -94,6 +130,9 @@ bool QAzureConnection::createCloudDir(const QString &name) {
     return true;
 }
 
+/*!
+  \reimp
+  */
 bool QAzureConnection::put(QCloudFile &f, QString bucket) {
     Request r;
     QNetworkReply *reply;
@@ -111,10 +150,16 @@ bool QAzureConnection::put(QCloudFile &f, QString bucket) {
     return true;
 }
 
+/*!
+  \reimp
+  */
 bool QAzureConnection::put(QCloudTable &table){
     return true;
 }
 
+/*!
+  \reimp
+  */
 bool QAzureConnection::put(QCloudDir &dir) {
     QList<QString> contents = dir.getCloudDirContentsAsString();
     int size = contents.size();
@@ -144,6 +189,10 @@ bool QAzureConnection::put(QCloudDir &dir) {
     return true;
 }
 
+
+/*!
+  \reimp
+  */
 bool QAzureConnection::get(QCloudDir &d) {
     QString path = d.getPath();
     QList<QString> contents;
@@ -180,10 +229,16 @@ bool QAzureConnection::get(QCloudDir &d) {
     return true;
 }
 
+/*!
+   \reimp
+  */
 QCloudResponse::RESPONSETYPE QAzureConnection::findType(QNetworkReply &reply, QByteArray &contents) {
     return QCloudResponse::CLOUDDIR;
 }
 
+/*!
+  \reimp
+  */
 QList<QString> QAzureConnection::getCloudDir() {
     Request r;
     QNetworkReply *reply;
@@ -196,6 +251,9 @@ QList<QString> QAzureConnection::getCloudDir() {
     return parseCloudDirListings(contents);
 }
 
+/*!
+  \reimp
+  */
 QList<QString> QAzureConnection::getCloudDirContents(QString bucketName) {
     Request r;
     QNetworkReply *reply;
@@ -210,7 +268,9 @@ QList<QString> QAzureConnection::getCloudDirContents(QString bucketName) {
     return parseCloudDirContentsListing(contents);
 }
 
-
+/*!
+  \reimp
+  */
 QCloudFile* QAzureConnection::get(QString bucket, QString name){
     Request r;
     QNetworkReply *reply;
@@ -224,8 +284,9 @@ QCloudFile* QAzureConnection::get(QString bucket, QString name){
     return f;
 }
 
-
-
+/*!
+  \reimp
+  */
 QNetworkRequest QAzureConnection::encode(const Request &r) {
     QString urlString("http://");
 
@@ -291,31 +352,33 @@ void QAzureConnection::setOverrideLocal(bool value) {
 }
 
 //SEND FUNCTIONS
+/*!
+  \reimp
+  */
 QNetworkReply* QAzureConnection::sendGet(const QNetworkRequest &req) {
     QEventLoop loop;
     QNetworkReply *reply;
     reply = manager->get(req);
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
-    if (reply->error() > 0) {
-        qDebug() << reply->errorString();
-    }
     return reply;
 }
 
+/*!
+  \reimp
+  */
 QNetworkReply* QAzureConnection::sendPut(const QNetworkRequest &req, const QByteArray &payload) {
    QEventLoop loop;
    QNetworkReply *reply;
    reply = manager->put(req, payload);
    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
    loop.exec();
-
-   if (reply->error() > 0) {
-       qDebug() << reply->errorString();
-   }
    return reply;
 }
 
+/*!
+  \reimp
+  */
 QNetworkReply* QAzureConnection::sendHead(const QNetworkRequest &req) {
     QEventLoop l;
     QNetworkReply *reply;
@@ -327,6 +390,9 @@ QNetworkReply* QAzureConnection::sendHead(const QNetworkRequest &req) {
 }
 
 //PARSERS
+/*!
+  \reimp
+  */
 QList<QString> QAzureConnection::parseCloudDirListings(QByteArray &contents) {
     QXmlStreamReader reader;
     reader.addData(contents);
@@ -340,6 +406,9 @@ QList<QString> QAzureConnection::parseCloudDirListings(QByteArray &contents) {
     return foo;
 }
 
+/*!
+  \reimp
+  */
 QList<QString> QAzureConnection::parseCloudDirContentsListing(QByteArray &contents) {
     QXmlStreamReader reader;
     QList<QString> foo;

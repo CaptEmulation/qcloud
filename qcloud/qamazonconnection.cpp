@@ -5,6 +5,16 @@
 #include <QDateTime>
 #include <QEventLoop>
 
+/*!
+  \class QAmazonConnection
+  \brief Implementation of the QCloudConnection interface for Amazon.
+  \inherits QCloudConnection
+
+  Constructor, parameters are as follows: host = the adress where the requests are sent, i.e. s3.amazonaws.com
+                                          user = username in the service
+                                          password = AWSAccessKeyId
+                                          secret = the secret key obtained from the service
+ */
 QAmazonConnection::QAmazonConnection(QByteArray user, QByteArray password, QByteArray secret) {
     this->host = "s3.amazonaws.com";
     this->username = user;
@@ -17,6 +27,9 @@ QAmazonConnection::~QAmazonConnection() {
     manager->deleteLater();
 }
 
+/*!
+  Deletes a blob( \a name ) in a bucket ( \a bucket)
+  */
 bool QAmazonConnection::deleteBlob(QString name, QString bucket) {
     Request r;
     r.headers.insert("verb", "DELETE");
@@ -25,6 +38,9 @@ bool QAmazonConnection::deleteBlob(QString name, QString bucket) {
     return true;
 }
 
+/*!
+  Deletes a whole bucket (\a bucket)
+  */
 bool QAmazonConnection::deleteCloudDir(QString bucket) {
     Request r;
     r.headers.insert("verb", "DELETE");
@@ -32,29 +48,34 @@ bool QAmazonConnection::deleteCloudDir(QString bucket) {
     return true;
 }
 
+/*!
+  Creates a new clouddir named \a dirName to the cloud. Returns true if success
+  else false.
+  */
 bool QAmazonConnection::createCloudDir(const QString &dirName) {
-    QString region = "EU";
-
-    QString msg("<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><LocationConstraint>EU</LocationConstraint></CreateBucketConfiguration >");
     Request r;
     r.headers.insert("verb", "PUT");
     r.headers.insert("bucket", dirName);
     r.headers.insert("filesize", "0");
-    QNetworkReply *reply;
-    try {
-        QByteArray data("");
-        reply = sendPut(encode(r), data);
-        r.headers.clear();
-        reply->deleteLater();
+
+    QByteArray data("");
+    QNetworkReply *reply = sendPut(encode(r), data);
+    r.headers.clear();
+
+    if (reply->error() != 0) {
+        qDebug() << reply->errorString();
         qDebug() << reply->readAll();
-        return true;
-    } catch (QString msg) {
-        qDebug() << msg;
         reply->deleteLater();
         return false;
     }
+    reply->deleteLater();
+    qDebug() << reply->readAll();
+    return true;
 }
 
+/*!
+  Checks if the \a dirName exists in the cloud.
+  */
 bool QAmazonConnection::cloudDirExists(const QString &dirName) {
     Request r;
     r.headers.insert("verb", "HEAD");
@@ -67,6 +88,10 @@ bool QAmazonConnection::cloudDirExists(const QString &dirName) {
     return true;
 }
 
+/*!
+  Puts a \a d  clouddir to the cloud. If overrideCloud is defined as true
+  the whole directory is overridden else only the new files are uploaded.
+  */
 bool QAmazonConnection::put(QCloudDir &d) {
     disconnect(manager, 0, this, 0);
     QString path = d.getPath();
@@ -102,6 +127,11 @@ bool QAmazonConnection::put(QCloudDir &d) {
     return true;
 }
 
+/*!
+  Downloads clouddir \a d to the computer. If overrideLocal is true the function
+  downloads everything and overrides local copies, else it just gets the files that
+  do not exist in the computer.
+  */
 bool QAmazonConnection::get(QCloudDir &d) {
 
     QString path = d.getPath();
@@ -138,31 +168,36 @@ bool QAmazonConnection::get(QCloudDir &d) {
     return true;
 }
 
-
-
+/*!
+  Downloads the file \a fileName from a bucket \a bucket. Returns a pointer to a new
+  QCloudFile that is also a local file.
+  */
 QCloudFile* QAmazonConnection::get(QString bucket, QString fileName) {
     Request r;
-    QNetworkReply *reply;
+
     r.headers.insert("verb", "GET");
     r.headers.insert("bucket", bucket);
     r.headers.insert("filename", fileName);
 
-    try {
-        reply = sendGet(encode(r));
-        r.headers.clear();
-        QCloudFile* file = new QCloudFile(reply->readAll(), fileName, bucket);
-        reply->deleteLater();
+
+    QNetworkReply *reply = sendGet(encode(r));
+    r.headers.clear();
+    reply->deleteLater();
+    if (reply->error() != 0) {
+        qDebug() << reply->errorString();
+        qDebug() << reply->readAll();
         emit finished();
-        return file;
+        return NULL;
     }
-    catch (const char* msg)
-    {
-        qDebug() << msg;
-        emit finished();
-    }
+    QCloudFile* file = new QCloudFile(reply->readAll(), fileName, bucket);
+    emit finished();
+    return file;
+
 }
 
-
+/*!
+  getCloudDir gets the list of buckets in the cloud owned by the creator.
+  */
 QList<QString> QAmazonConnection::getCloudDir() {
     Request r;
     QNetworkReply *reply;
@@ -180,6 +215,9 @@ QList<QString> QAmazonConnection::getCloudDir() {
 
 }
 
+/*!
+  Gets the contents of a CloudDir \a bucketName as a list of strings.
+  */
 
 QList<QString> QAmazonConnection::getCloudDirContents(QString bucketName) {
     Request r;
@@ -189,7 +227,10 @@ QList<QString> QAmazonConnection::getCloudDirContents(QString bucketName) {
     r.headers.insert("bucket", bucketName);
 
     reply = sendGet(encode(r));
-
+    if (reply->error() != 0) {
+        qDebug() << reply->errorString();
+        qDebug() << reply->readAll();
+    }
     QByteArray array = reply->readAll();
     reply->deleteLater();
     return parseCloudDirContentListing(&array);
@@ -199,6 +240,9 @@ bool QAmazonConnection::put(QCloudTable &table) {
     return true;
 }
 
+/*!
+  Amazon does not allow / and + in the signature, so replace them with this function.
+  */
 void QAmazonConnection::replaceUnallowed(QByteArray *array) {
     array->replace('/', "%2F");
     array->replace('+', "%2B");
@@ -213,16 +257,14 @@ bool QAmazonConnection::put(QCloudFile &f, QString bucket) {
     r.headers.insert("Content-Type", "text/plain");
     r.headers.insert("filesize", QByteArray::number(f.getSize()));
 
-    QNetworkReply *reply;
-    try {
-        reply = sendPut(encode(r), f.getContents());
-        r.headers.clear();
-        reply->deleteLater();
-        return true;
-    } catch (QString msg){
+
+    QNetworkReply *reply = sendPut(encode(r), f.getContents());
+    r.headers.clear();
+    reply->deleteLater();
+    if (reply->error() != 0) {
         return false;
-        reply->deleteLater();
     }
+    return true;
 }
 
 /**
@@ -342,7 +384,6 @@ QList<QString> QAmazonConnection::parseCloudDirContentListing(QByteArray *messag
 
 QCloudResponse::RESPONSETYPE QAmazonConnection::findType(QNetworkReply &reply, QByteArray &contents) {
     contents = reply.readAll();
-    qDebug() << reply.errorString();
     QXmlStreamReader reader;
     reader.addData(contents);
     reader.readNextStartElement();
