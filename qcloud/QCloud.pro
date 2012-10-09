@@ -13,12 +13,14 @@ LIBS += qcloud.lib
 SOURCES += \
     qclouditem.cpp \
     qcloudfile.cpp \
-    qcloudconnection.cpp \
     qamazonconnection.cpp \
     qazureconnection.cpp \
     hmacsha.cpp \
     qclouddir.cpp \
-    qcloudresponse.cpp
+    qcloudresponse.cpp \
+    qcloudconnection.cpp \
+    qcloudlistresponse.cpp \
+    qcloudfileresponse.cpp
 HEADERS += qclouditem.h \
     qcloudfile.h \
     qcloudconnection.h \
@@ -26,4 +28,6 @@ HEADERS += qclouditem.h \
     qazureconnection.h \
     hmacsha.h \
     qclouddir.h \
-    qcloudresponse.h
+    qcloudresponse.h \
+    qcloudlistresponse.h \
+    qcloudfileresponse.h

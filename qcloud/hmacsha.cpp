@@ -1,19 +1,24 @@
 #include "hmacsha.h"
 
-/**
+/*!
   Library to provide the Hash-based message authentication codes using SHA1 and SHA256 algorithms. At the moment
   both are used but in the future SHA256 will be the only one.
   */
 
 HmacSHA::HmacSHA(QObject *parent) : QObject(parent){}
 
-/**
+/*!
   Modified version of the hmacSha1 example from http://qt-project.org/wiki/HMAC-SHA1
+
+  Takes \a stringToSign that is constructed from the request, \a secretKey that is the users
+  own credential to a cloud service provider, and \a t that is the type of used algorithm (sha1 or sha256)
+
+  returns a byte array containing the hash signature.
   */
 QByteArray HmacSHA::hash(HmacSHAType t, QByteArray stringToSign, QByteArray secretKey){
 
 
-    QCryptographicHash::Algorithm alg = (t == HmacSHA1) ? QCryptographicHash::Sha1 : QCryptographicHash::Sha256;
+    QCryptographicHash::Algorithm alg = (t == SHA1) ? QCryptographicHash::Sha1 : QCryptographicHash::Sha256;
 
     int blockSize = 64; // HMAC-SHA-1 & SHA-256 Blocksize
 
@@ -46,24 +51,4 @@ QByteArray HmacSHA::hash(HmacSHAType t, QByteArray stringToSign, QByteArray secr
 
     QByteArray replaced = hashed.toBase64();
     return replaced;
-}
-
-bool HmacSHA::testHmac(HmacSHAType t) {
-    switch (t) {
-        case HmacSHA256: {
-            QByteArray key2 = QByteArray::fromHex("0102030405060708090a0b0c0d0e0f10111213141516171819");
-            QByteArray data2 = QByteArray::fromHex("cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd");
-            QByteArray shouldB2 = QByteArray::fromHex("82558a389a443c0ea4cc819899f2083a85f0faa3e578f8077a2e3ff46729665b");
-
-            QByteArray hashed = HmacSHA::hash(HmacSHA::HmacSHA256, data2, key2);
-            QByteArray asdf = shouldB2.toBase64();
-
-            if (hashed == asdf) {
-                return true;
-            } else return false;
-        }
-    case HmacSHA1: {
-            return true;
-        }
-    }
 }

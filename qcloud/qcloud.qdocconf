@@ -16,13 +16,27 @@
  # containing the header files associated
  # with the .cpp source files used in the documentation.
 
- headerdirs  = .
+
+ headers = qcloudconnection.h \
+           qamazonconnection.h \
+           qazureconnection.h  \
+           qclouditem.h \
+           qcloudfile.h \
+           qclouddir.h \
+           qcloudresponse.h
+
 
  # The sourcedirs variable specifies the
  # directories containing the .cpp or .qdoc
  # files used in the documentation.
 
- sourcedirs  = .
 
- sources.fileextensions = "*.cpp *.qdoc *.mm *.qml"
- headers.fileextensions = "*.h *.ch *.h++ *.hh *.hpp *.hxx"
+ sources =  qamazonconnection.cpp \
+            qazureconnection.cpp \
+            qclouditem.cpp \
+            qcloudfile.cpp \
+            qclouddir.cpp \
+            qcloudresponse.cpp 
+
+ sources.fileextensions = "*.cpp"
+ headers.fileextensions = "*.h"

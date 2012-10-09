@@ -2,7 +2,13 @@
 #define QCLOUDRESPONSE_H
 
 #include <QObject>
+#include <QNetworkReply>
+/*!
+  \author Jarkko Laitinen
+  \module QCloud
 
+  \brief QCloudResponse is used when QCloudConnection is used asynchronious.
+  */
 class QCloudResponse : public QObject
 {
     Q_OBJECT
@@ -14,12 +20,13 @@ public:
     int error();
     QCloudResponse::RESPONSETYPE getResponseType();
 signals:
-    void finished(QCloudResponse*);
+    void finished();
 private:
-
     QByteArray response;
     int errorCount;
     QCloudResponse::RESPONSETYPE type;
+    QNetworkReply *reply;
+
 };
 
 #endif // QCLOUDRESPONSE_H

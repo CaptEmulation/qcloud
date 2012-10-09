@@ -3,11 +3,11 @@
 
 #include <QObject>
 
-/**
-  Author: Jarkko Laitinen
-  Version: 0.1
+/*!
+  \author Jarkko Laitinen
+  \module QCloud
 
-  Interface for the different types of items used in the cloud. Can be a file or a table.
+  \brief Interface for the different types of items used in the cloud. Can be a file or a table.
   */
 
 class QCloudItem : public QObject

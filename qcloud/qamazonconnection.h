@@ -8,8 +8,15 @@
 #include "qcloudfile.h"
 #include "qcloudresponse.h"
 #include "qclouddir.h"
+#include "qcloudlistresponse.h"
 #include <QTimer>
 
+/*!
+  \author Jarkko Laitinen
+  \module QCloud
+
+  \brief QAmazonConnection is an implementation of the interface QCloudConnetion
+  */
 class QAmazonConnection : public QCloudConnection
 {
     Q_OBJECT
@@ -31,7 +38,8 @@ public:
     virtual QList<QString> getCloudDirContents(QString bucketName);
     virtual bool deleteBlob(QString name, QString bucket);
     virtual bool deleteCloudDir(QString bucket);
-
+    QCloudListResponse* asyncGetCloudDir();
+    QCloudListResponse* asyncGetCloudDirContents(QString cloudDir);
     /*!
       \fn QAmazonConnection::parseCloudDirContentListing()
       \brief Parses message received from cloud and returns a list of blobs in a clouddir.

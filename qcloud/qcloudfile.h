@@ -6,10 +6,10 @@
 #include <QFileInfo>
 #include <QDebug>
 /**
-  Author: Jarkko Laitinen
-  Version: 0.1
+  \author Jarkko Laitinen
+  \module QCloud
 
-  A stub for the future implementation of QCloudFile. Implements the QCloudItem interface.
+  \brief QCloudFile is a implementation of the QCloudItem interface.
   */
 
 class QCloudFile : public QCloudItem

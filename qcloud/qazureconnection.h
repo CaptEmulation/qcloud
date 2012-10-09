@@ -10,9 +10,10 @@
 #include <QNetworkReply>
 
 /**
-  Author: Jarkko Laitinen
+  \author Jarkko Laitinen
+  \module QCloud
 
-  Implementation of the QCloudConnection interface for Microsoft Windows Azure.
+  \brief Implementation of the QCloudConnection interface for Microsoft Windows Azure.
   */
 class QAzureConnection : public QCloudConnection
 {

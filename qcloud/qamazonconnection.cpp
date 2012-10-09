@@ -8,12 +8,14 @@
 /*!
   \class QAmazonConnection
   \brief Implementation of the QCloudConnection interface for Amazon.
-  \inherits QCloudConnection
+  \module QCloud
 
   Constructor, parameters are as follows: host = the adress where the requests are sent, i.e. s3.amazonaws.com
                                           user = username in the service
                                           password = AWSAccessKeyId
                                           secret = the secret key obtained from the service
+
+  \sa QCloudConnection
  */
 QAmazonConnection::QAmazonConnection(QByteArray user, QByteArray password, QByteArray secret) {
     this->host = "s3.amazonaws.com";
@@ -181,7 +183,6 @@ QCloudFile* QAmazonConnection::get(QString bucket, QString fileName) {
 
 
     QNetworkReply *reply = sendGet(encode(r));
-    r.headers.clear();
     reply->deleteLater();
     if (reply->error() != 0) {
         qDebug() << reply->errorString();
@@ -199,7 +200,7 @@ QCloudFile* QAmazonConnection::get(QString bucket, QString fileName) {
   getCloudDir gets the list of buckets in the cloud owned by the creator.
   */
 QList<QString> QAmazonConnection::getCloudDir() {
-    Request r;
+    Request r;    
     QNetworkReply *reply;
     r.headers.insert("verb", "GET");
     reply = sendGet(encode(r));
@@ -236,9 +237,6 @@ QList<QString> QAmazonConnection::getCloudDirContents(QString bucketName) {
     return parseCloudDirContentListing(&array);
 }
 
-bool QAmazonConnection::put(QCloudTable &table) {
-    return true;
-}
 
 /*!
   Amazon does not allow / and + in the signature, so replace them with this function.
@@ -259,7 +257,6 @@ bool QAmazonConnection::put(QCloudFile &f, QString bucket) {
 
 
     QNetworkReply *reply = sendPut(encode(r), f.getContents());
-    r.headers.clear();
     reply->deleteLater();
     if (reply->error() != 0) {
         return false;
@@ -298,7 +295,7 @@ QNetworkRequest QAmazonConnection::encode(const Request &r) {
 
     QUrl url(urlString);
 
-    QByteArray hashedSignature = HmacSHA::hash(HmacSHA::HmacSHA1, stringToSign, this->secret);
+    QByteArray hashedSignature = HmacSHA::hash(HmacSHA::SHA1, stringToSign, this->secret);
 
 
     replaceUnallowed(&hashedSignature);
@@ -409,5 +406,29 @@ void QAmazonConnection::requestFinished(QNetworkReply *reply) {
     QCloudResponse *resp = new QCloudResponse(cont, error, type);
     reply->deleteLater();
     emit cloudRequestFinished(resp);
+}
+
+
+QCloudListResponse* QAmazonConnection::asyncGetCloudDir() {
+    Request r;
+    QNetworkReply *reply;
+    QNetworkRequest req;
+    r.headers.insert("verb", "GET");
+    req = encode(r);
+
+    reply = manager->get(req);
+
+    return new QCloudListResponse(reply);
+}
+
+QCloudListResponse* QAmazonConnection::asyncGetCloudDirContents(QString cloudDir) {
+    Request r;
+    QNetworkReply *reply;
+    QNetworkRequest req;
+    r.headers.insert("verb", "GET");
+    r.headers.insert("bucket", cloudDir);
+    req = encode(r);
+    reply = manager->get(req);
+    return new QCloudListResponse(reply);
 }
 

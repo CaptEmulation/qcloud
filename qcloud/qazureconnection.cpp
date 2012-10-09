@@ -7,10 +7,8 @@ QAzureConnection::~QAzureConnection() {
 
 /*!
   \class QAzureConnection
-  \inherits QCloudConnection
-
   \brief Implementation of the interface QCloudConnection for Azure.
-
+  \module QCloud
 
   Constructor to create new QAzureConnections. This contains three parameters and all should be in the right format.
   The first parameter is QByteArray containing the url of the service i.e. "http://kikkare.blob.core.windows.net" where
@@ -18,6 +16,8 @@ QAzureConnection::~QAzureConnection() {
   library has better support for SharedKey authentication. storageKey parameter should be made with QByteArray::fromBase64()
   as the key provided by Microsoft is Base64 encoded. The constructor also creates a new Headers-struct according to the
   provided authentication type.
+
+  \sa QCloudConnection
   */
 QAzureConnection::QAzureConnection(QByteArray url, QByteArray storageAccountName, QByteArray storageKey) {
     this->url = url;
@@ -28,6 +28,7 @@ QAzureConnection::QAzureConnection(QByteArray url, QByteArray storageAccountName
 }
 
 /*!
+    \internal
     \fn QAzureConnection::initializeHeaders()
     \brief Initializes headers used in the signing of SharedKey requests */
 void QAzureConnection::initializeHeaders() {
@@ -45,6 +46,8 @@ void QAzureConnection::initializeHeaders() {
 }
 
 /*!
+  \fn QAzureConnection::initializeSharedKeyLiteHeaders()
+  \internal
   \brief Initializes headers to be used with SharedKeyLite requests.
 */
 void QAzureConnection::initializeSharedKeyLiteHeaders() {
@@ -55,6 +58,8 @@ void QAzureConnection::initializeSharedKeyLiteHeaders() {
 }
 
 /*!
+  \fn QAzureConnection::dateInRFC1123()
+  \internal
   \brief Azure requires dates to be in RFC1123 format that Qt's QDateTime does not provide,
   so this helper provides it.
   */
@@ -97,7 +102,7 @@ bool QAzureConnection::cloudDirExists(const QString &dirName) {
     reply = sendGet(encode(r));
 
     //If the cloudDir does not exist in cloud the response is 404 or 403.
-    //Azure does not provide a API-call for checking the existance of containers.
+    //Azure does n8ot provide a API-call for checking the existance of containers.
 
     if (reply->error() != 0) {
         return false;
@@ -150,12 +155,6 @@ bool QAzureConnection::put(QCloudFile &f, QString bucket) {
     return true;
 }
 
-/*!
-  \reimp
-  */
-bool QAzureConnection::put(QCloudTable &table){
-    return true;
-}
 
 /*!
   \reimp
@@ -178,7 +177,8 @@ bool QAzureConnection::put(QCloudDir &dir) {
             }
         }
     }
-    else {
+    else
+    {
         for (int i = 0; i < size; i++) {
             put((*dir.get(i)), path);
             emit valueChanged(i);
@@ -210,13 +210,17 @@ bool QAzureConnection::get(QCloudDir &d) {
                     emit valueChanged(i);
                 }
             }
-        } else {
+        }
+        else
+        {
                 for (int i = 0; i < size; i++){
                 get(path, d.get(i)->getName());
                 emit valueChanged(i);
             }
         }
-    } else {
+    }
+    else
+    {
         contents = getCloudDirContents(path);
         size = contents.size();
         emit setRange(0, size);
@@ -230,7 +234,7 @@ bool QAzureConnection::get(QCloudDir &d) {
 }
 
 /*!
-   \reimp
+   \internal
   */
 QCloudResponse::RESPONSETYPE QAzureConnection::findType(QNetworkReply &reply, QByteArray &contents) {
     return QCloudResponse::CLOUDDIR;
@@ -288,13 +292,15 @@ QCloudFile* QAzureConnection::get(QString bucket, QString name){
   \reimp
   */
 QNetworkRequest QAzureConnection::encode(const Request &r) {
-    QString urlString("http://");
+    QString urlString("http://" + this->url);
 
-    //Tämä uusiksi, rumaa rumaa rumaa.
-    if (r.headers.value("verb") == "PUT" && !r.headers.contains("operation")) urlString += this->url + r.headers.value("path");
-    else if (r.headers.contains("path") && r.headers.contains("operation")) urlString += this->url + r.headers.value("path") + "?" +r.headers.value("operation");
-    else if (r.headers.value("verb") == "GET" && !r.headers.contains("operation")) urlString += this->url + r.headers.value("path");
-    else urlString += this->url + "?" + r.headers.value("operation");
+    if (r.headers.contains("path")) {
+        urlString += r.headers.value("path");
+    }
+
+    if (r.headers.contains("operation")) {
+        urlString += "?" + r.headers.value("operation");
+    }
 
     QUrl url = QUrl::fromEncoded(urlString.toAscii());
     QNetworkRequest req;
@@ -327,11 +333,11 @@ QNetworkRequest QAzureConnection::encode(const Request &r) {
         stringToSign += "\n" + temp.replace("=", ":").replace("&", "\n");
     }
     QByteArray key = QByteArray::fromBase64(this->storageKey);
-    QByteArray hash = HmacSHA::hash(HmacSHA::HmacSHA256, stringToSign, key);
+    QByteArray hash = HmacSHA::hash(HmacSHA::SHA256, stringToSign, key);
 
     QString version = "2009-09-19";
     QByteArray test = this->authentication + " " + this->storageAccountName + ":" + hash;
-    qDebug() << test;
+
     req.setRawHeader("Authorization", test);
     req.setRawHeader("x-ms-date", date.toAscii());
     req.setRawHeader("x-ms-version", version.toAscii());
@@ -353,7 +359,7 @@ void QAzureConnection::setOverrideLocal(bool value) {
 
 //SEND FUNCTIONS
 /*!
-  \reimp
+  \internal
   */
 QNetworkReply* QAzureConnection::sendGet(const QNetworkRequest &req) {
     QEventLoop loop;
@@ -365,7 +371,7 @@ QNetworkReply* QAzureConnection::sendGet(const QNetworkRequest &req) {
 }
 
 /*!
-  \reimp
+  \internal
   */
 QNetworkReply* QAzureConnection::sendPut(const QNetworkRequest &req, const QByteArray &payload) {
    QEventLoop loop;
@@ -377,7 +383,7 @@ QNetworkReply* QAzureConnection::sendPut(const QNetworkRequest &req, const QByte
 }
 
 /*!
-  \reimp
+  \internal
   */
 QNetworkReply* QAzureConnection::sendHead(const QNetworkRequest &req) {
     QEventLoop l;

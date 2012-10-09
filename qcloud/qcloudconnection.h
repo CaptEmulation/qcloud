@@ -12,8 +12,8 @@
 /*!
   \author Jarkko Laitinen
   \version 1.0a
-  \interface QCloudConnection
-
+  \interface
+  \module QCloud
   QCloudConnection is the interface for a cloud connection object. These methods are required and should be
   implemented as documented.
   */
@@ -24,6 +24,8 @@ class QCloudConnection : public QObject
 public:
 
     /*!
+      \fn get(QString bucket, QString fileName)
+
       Virtual get function that returns the pointer to a QByteArray that is the response from get request.
       Parameters are, bucket(the name of the bucket) and fileName(the wanted file).
       */
@@ -31,6 +33,8 @@ public:
 
     virtual bool get(QCloudDir &d) = 0;
     /*!
+      \fn virtual bool get(QCloudDir &d)
+
       Virtual put function that retuns true if the put operation is a success, if not false. First parameter
       is the QCloudFile that is put in the cloud and the second parameter is the bucket where it is placed.
       */
