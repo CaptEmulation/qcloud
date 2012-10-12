@@ -78,6 +78,9 @@ QString QAzureConnection::dateInRFC1123() {
  \reimp
   */
 bool QAzureConnection::deleteBlob(QString name, QString bucket) {
+    Request r;
+    r.headers.insert("verb", "GET");
+    r.headers.insert("path", bucket + "/" + name);
     return true;
 }
 
@@ -85,6 +88,8 @@ bool QAzureConnection::deleteBlob(QString name, QString bucket) {
   \reimp
   */
 bool QAzureConnection::deleteCloudDir(QString bucket) {
+    Request r;
+    r.headers.insert("path", bucket);
     return true;
 }
 
@@ -233,12 +238,6 @@ bool QAzureConnection::get(QCloudDir &d) {
     return true;
 }
 
-/*!
-   \internal
-  */
-QCloudResponse::RESPONSETYPE QAzureConnection::findType(QNetworkReply &reply, QByteArray &contents) {
-    return QCloudResponse::CLOUDDIR;
-}
 
 /*!
   \reimp

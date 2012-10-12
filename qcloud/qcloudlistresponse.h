@@ -5,6 +5,7 @@
 #include <QNetworkReply>
 #include <QList>
 #include <QXmlStreamReader>
+#include "qclouddir.h"
 #include <QDebug>
 
 class QCloudListResponse : public QObject
@@ -12,10 +13,10 @@ class QCloudListResponse : public QObject
     Q_OBJECT
 public:
     explicit QCloudListResponse(QObject *parent = 0);
-    QList<QString> readAll();
+    QList<QString> getParsed();
     QCloudListResponse(QNetworkReply *reply);
     int error();
-    QByteArray getunparsed();
+    QByteArray getUnparsed();
 private:
     QNetworkReply *reply;
     QList<QString> list;

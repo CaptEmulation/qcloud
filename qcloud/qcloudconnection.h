@@ -117,9 +117,6 @@ private:
       */
     virtual QNetworkRequest encode(const Request &r) = 0;
 
-    virtual QCloudResponse::RESPONSETYPE findType(QNetworkReply &reply, QByteArray &contents) = 0;
-
-
 
 signals:
     void requestFinished();

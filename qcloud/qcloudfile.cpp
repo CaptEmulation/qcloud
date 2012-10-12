@@ -1,16 +1,7 @@
 #include "qcloudfile.h"
 
-void QCloudFile::save() {
-
-}
-
-
-void QCloudFile::setLocal() {
-    this->local = true;
-}
-
-void QCloudFile::setContents(const QByteArray &contents) {
-    this->contents = contents;
+void QCloudFile::setLocal(bool isLocal) {
+    this->local = isLocal;
 }
 
 QCloudFile::QCloudFile(QString fileName) {
@@ -86,13 +77,5 @@ QString QCloudFile::getName() {
 }
 qint64 QCloudFile::getSize() {
     return this->size;
-}
-
-void QCloudFile::setName(QString name) {
-    this->name = name;
-}
-
-QFile* QCloudFile::getFile() {
-    return this->file;
 }
 

@@ -14,13 +14,8 @@ class QCloudItem : public QObject
 {
     Q_OBJECT
 public:
-    /**
-      save function should do the following. If the file is local the changes should be changed on the local file and also
-      sent to the cloud.
-      */
-    virtual void save() = 0;
 
-    /**
+    /*!
       if the file is local as in QFile f("foo.txt") this should return true, else it will return false.
       */
     virtual bool isLocal() = 0;

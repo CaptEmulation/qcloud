@@ -79,8 +79,6 @@ private:
     void initializeHeaders();
     void initializeSharedKeyLiteHeaders();
 
-    virtual QCloudResponse::RESPONSETYPE findType(QNetworkReply &reply, QByteArray &contents);
-
     virtual void setOverrideLocal(bool value);
     virtual void setOverrideCloud(bool value);
 

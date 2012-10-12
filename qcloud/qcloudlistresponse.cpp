@@ -13,7 +13,7 @@ QCloudListResponse::QCloudListResponse(QNetworkReply *reply) {
 }
 
 
-QList<QString> QCloudListResponse::readAll() {
+QList<QString> QCloudListResponse::getParsed() {
     return this->list;
 }
 
@@ -49,6 +49,6 @@ void QCloudListResponse::requestFinished() {
 
 }
 
-QByteArray QCloudListResponse::getunparsed() {
+QByteArray QCloudListResponse::getUnparsed() {
     return this->unparsed;
 }

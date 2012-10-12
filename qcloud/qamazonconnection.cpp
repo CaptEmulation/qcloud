@@ -379,6 +379,7 @@ QList<QString> QAmazonConnection::parseCloudDirContentListing(QByteArray *messag
     return files;
 }
 
+/*
 QCloudResponse::RESPONSETYPE QAmazonConnection::findType(QNetworkReply &reply, QByteArray &contents) {
     contents = reply.readAll();
     QXmlStreamReader reader;
@@ -391,6 +392,7 @@ QCloudResponse::RESPONSETYPE QAmazonConnection::findType(QNetworkReply &reply, Q
                return QCloudResponse::CLOUDDIRCONTENTS;
     } else return QCloudResponse::CLOUDFILE;
 }
+*/
 
 //SLOTS
 void QAmazonConnection::requestFinished(QNetworkReply *reply) {
@@ -398,7 +400,7 @@ void QAmazonConnection::requestFinished(QNetworkReply *reply) {
     QCloudResponse::RESPONSETYPE type;
     QByteArray cont = "";
     if (error == 0) {
-        type = static_cast<QCloudResponse::RESPONSETYPE>(findType(*reply, cont));
+        type = QCloudResponse::CLOUDDIR;
     } else {
         cont = reply->readAll();
         type = QCloudResponse::CLOUDDIR;
@@ -430,5 +432,18 @@ QCloudListResponse* QAmazonConnection::asyncGetCloudDirContents(QString cloudDir
     req = encode(r);
     reply = manager->get(req);
     return new QCloudListResponse(reply);
+}
+
+QCloudFileResponse* QAmazonConnection::asyncGetCloudFile(QString bucket, QString fileName) {
+    Request r;
+    QNetworkReply *reply;
+    QNetworkRequest req;
+
+    r.headers.insert("verb", "GET");
+    r.headers.insert("bucket", bucket);
+    r.headers.insert("filename", fileName);
+    req = encode(r);
+    reply = manager->get(req);
+    return new QCloudFileResponse(reply);
 }
 

@@ -9,6 +9,7 @@
 #include "qcloudresponse.h"
 #include "qclouddir.h"
 #include "qcloudlistresponse.h"
+#include "qcloudfileresponse.h"
 #include <QTimer>
 
 /*!
@@ -38,6 +39,7 @@ public:
     virtual QList<QString> getCloudDirContents(QString bucketName);
     virtual bool deleteBlob(QString name, QString bucket);
     virtual bool deleteCloudDir(QString bucket);
+    QCloudFileResponse* asyncGetCloudFile(QString bucket, QString fileName);
     QCloudListResponse* asyncGetCloudDir();
     QCloudListResponse* asyncGetCloudDirContents(QString cloudDir);
     /*!
@@ -75,16 +77,6 @@ private:
       takes a pointer to the array and replaces the occurances.
       */
     void replaceUnallowed(QByteArray *array);
-
-
-
-    /*!
-      \fn QAmazonConnection::findType
-      \brief Finds the type of request from the reply
-
-      Finds the type of the reply from the reply and places it contents to contents, does not delete the QNetworkReply
-      */
-    virtual QCloudResponse::RESPONSETYPE findType(QNetworkReply &reply, QByteArray &contents);
 
     QNetworkAccessManager *manager;
     QByteArray host;
