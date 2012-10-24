@@ -121,6 +121,7 @@ private:
 signals:
     void requestFinished();
     void finished();
+    void failed();
     void getCloudDirFinished();
     void putCloudDirFinished();
     void cloudRequestFinished(QCloudResponse*);

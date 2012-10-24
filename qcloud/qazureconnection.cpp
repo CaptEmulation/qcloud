@@ -287,6 +287,46 @@ QCloudFile* QAzureConnection::get(QString bucket, QString name){
     return f;
 }
 
+QCloudFileResponse* QAzureConnection::asyncGetCloudFile(QString bucket, QString fileName) {
+    Request r;
+    QNetworkReply *reply;
+
+    r.headers.insert("verb", "GET");
+    r.headers.insert("path", "/" + bucket + "/" + fileName);
+    r.headers.insert("bucket", bucket);
+
+    QNetworkRequest requ = encode(r);
+    reply = manager->get(requ);
+
+    return new QCloudFileResponse(reply);
+}
+
+
+QCloudListResponse* QAzureConnection::asyncGetCloudDirContents(QString cloudDir) {
+    Request r;
+    QNetworkReply *reply;
+    r.headers.insert("verb", "GET");
+    r.headers.insert("path", "/" + cloudDir);
+    r.headers.insert("operation", "comp=list&restype=container");
+
+    QNetworkRequest requ = encode(r);
+    reply = manager->get(requ);
+    return new QCloudListResponse(reply);
+}
+
+QCloudListResponse* QAzureConnection::asyncGetCloudDir() {
+    Request r;
+    QNetworkReply *reply;
+    r.headers.insert("verb", "GET");
+    r.headers.insert("path", "/");
+    r.headers.insert("operation", "comp=list");
+
+    QNetworkRequest requ = encode(r);
+    reply = manager->get(requ);
+    return new QCloudListResponse(reply);
+}
+
+
 /*!
   \reimp
   */

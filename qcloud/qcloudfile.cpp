@@ -5,7 +5,7 @@ void QCloudFile::setLocal(bool isLocal) {
 }
 
 QCloudFile::QCloudFile(QString fileName) {
-    this->local = false;
+    this->setLocal(false);
     this->name = fileName;
     this->file = new QFile(fileName);
 }
@@ -23,7 +23,7 @@ QCloudFile::QCloudFile(QByteArray contents, QString fileName) {
     }
     f.write(contents);
     f.close();
-
+    this->setLocal(true);
     this->file = new QFile(fileName);
 }
 
@@ -45,6 +45,7 @@ QCloudFile::QCloudFile(QByteArray contents, QString fileName, QString bucket)
     f.write(contents);
     f.close();
     this->file = new QFile(fileName);
+    this->setLocal(true);
 }
 
 
@@ -61,11 +62,12 @@ QCloudFile::QCloudFile(QFile &f) {
     }
     this->contents = f.readAll();
     f.close();
+    this->setLocal(true);
 }
 
 
 bool QCloudFile::isLocal() {
-    return local;
+    return this->local;
 }
 
 QByteArray QCloudFile::getContents() {

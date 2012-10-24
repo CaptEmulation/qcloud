@@ -8,6 +8,8 @@
 #include "qcloudresponse.h"
 #include "qclouddir.h"
 #include <QNetworkReply>
+#include "qcloudfileresponse.h"
+#include "qcloudlistresponse.h"
 
 /**
   \author Jarkko Laitinen
@@ -45,6 +47,10 @@ public:
     virtual bool get(QCloudDir &d);
     virtual bool cloudDirExists(const QString &dirName);
     virtual  bool createCloudDir(const QString &dirName);
+
+    QCloudFileResponse* asyncGetCloudFile(QString bucket, QString fileName);
+    QCloudListResponse* asyncGetCloudDir();
+    QCloudListResponse* asyncGetCloudDirContents(QString cloudDir);
 
 private:
 

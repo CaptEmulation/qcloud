@@ -27,12 +27,14 @@ public:
     QCloudFile* get(int at);
 
     /**
-      If one of the files is not local then returns false, otherwise true.
+      If one of the files is not local then returns false, otherwise true. If
+      the folder contains no files returns true
       */
     virtual bool isLocal();
     QList<QCloudFile *>* getContents();
     QString getPath();
     void setContents(QList<QCloudFile *> *files);
+    int size();
 private:
     QList<QCloudFile *> contents;
     QString path;

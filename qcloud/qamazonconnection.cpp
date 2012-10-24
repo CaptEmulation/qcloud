@@ -187,8 +187,8 @@ QCloudFile* QAmazonConnection::get(QString bucket, QString fileName) {
     if (reply->error() != 0) {
         qDebug() << reply->errorString();
         qDebug() << reply->readAll();
-        emit finished();
-        return NULL;
+        emit failed();
+        return new QCloudFile("", fileName, bucket);
     }
     QCloudFile* file = new QCloudFile(reply->readAll(), fileName, bucket);
     emit finished();

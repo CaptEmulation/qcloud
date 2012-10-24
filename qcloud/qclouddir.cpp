@@ -51,9 +51,9 @@ QCloudFile* QCloudDir::get(int at) {
 }
 
 bool QCloudDir::isLocal() {
-    int size = contents.size();
+    int size = this->contents.size();
     if (size == 0) {
-        return false;
+        return true;
     }
     for (int i = 0; i < size; i++) {
         if (!contents.at(i)->isLocal())
@@ -73,4 +73,8 @@ QList<QString> QCloudDir::getCloudDirContentsAsString() {
         fileNames.append(this->contents.at(i)->getName());
     }
     return fileNames;
+}
+
+int QCloudDir::size() {
+    return this->contents.size();
 }
