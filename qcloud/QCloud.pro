@@ -1,11 +1,7 @@
-# -------------------------------------------------
-# Project created by QtCreator 2012-07-19T10:01:20
-# -------------------------------------------------
 QT += core \
     network
 QT -= gui
 TARGET = QCloud
-
 TEMPLATE = lib
 CONFIG -= app_bundle
 CONFIG += staticlib

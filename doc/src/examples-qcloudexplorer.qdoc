@@ -1,0 +1,9 @@
+/*!
+     \example examples/QCloudExplorer
+     \title QCloudExplorer Example
+     \subtitle
+
+     Explanation about the example
+
+    \snippet ../examples/qcloudexplorer/main.cpp 1
+*/

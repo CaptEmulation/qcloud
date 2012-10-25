@@ -12,20 +12,13 @@
 #include "qcloudfileresponse.h"
 #include <QTimer>
 
-/*!
-  \author Jarkko Laitinen
-  \module QCloud
-
-  \brief QAmazonConnection is an implementation of the interface QCloudConnetion
-  */
 class QAmazonConnection : public QCloudConnection
 {
     Q_OBJECT
+
 public:
-    ~QAmazonConnection();
-
-
     QAmazonConnection(QByteArray user, QByteArray password, QByteArray secret);
+    ~QAmazonConnection();
 
     /**
       The next virtual functions are inherited from QCloudConnection. These function as detailed in QCloudConnection
@@ -42,13 +35,6 @@ public:
     QCloudFileResponse* asyncGetCloudFile(QString bucket, QString fileName);
     QCloudListResponse* asyncGetCloudDir();
     QCloudListResponse* asyncGetCloudDirContents(QString cloudDir);
-    /*!
-      \fn QAmazonConnection::parseCloudDirContentListing()
-      \brief Parses message received from cloud and returns a list of blobs in a clouddir.
-
-      Parser method that returns a list of strings that contain the files included in the getBucketContents()
-      response.
-      */
     QList<QString> parseCloudDirContentListing(QByteArray *array);
 
     /*!
@@ -69,13 +55,6 @@ private:
     virtual QNetworkReply* sendPut(const QNetworkRequest &req, const QByteArray &payload);
     virtual QNetworkReply* sendHead(const QNetworkRequest &req);
 
-    /*!
-      \fn QAmazonConnection::replaceUnallowed
-      \brief replaces / and + with their encoded values.
-
-      Amazon defines that + and / should be replaced from the hashed to %2F and %2B. This function
-      takes a pointer to the array and replaces the occurances.
-      */
     void replaceUnallowed(QByteArray *array);
 
     QNetworkAccessManager *manager;

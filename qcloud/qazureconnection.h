@@ -11,22 +11,13 @@
 #include "qcloudfileresponse.h"
 #include "qcloudlistresponse.h"
 
-/**
-  \author Jarkko Laitinen
-  \module QCloud
-
-  \brief Implementation of the QCloudConnection interface for Microsoft Windows Azure.
-  */
 class QAzureConnection : public QCloudConnection
 {
     Q_OBJECT
 
 public:
     ~QAzureConnection();
-
-
     QAzureConnection(QByteArray url, QByteArray authentication, QByteArray storageKey);
-
 
     /**
       At the moment this is nofunc as it always returns false.
@@ -42,7 +33,6 @@ public:
     virtual bool deleteBlob(QString name, QString bucket);
     virtual bool deleteCloudDir(QString bucket);
 
-
     virtual QCloudFile* get(QString bucket, QString name);
     virtual bool get(QCloudDir &d);
     virtual bool cloudDirExists(const QString &dirName);
@@ -53,7 +43,6 @@ public:
     QCloudListResponse* asyncGetCloudDirContents(QString cloudDir);
 
 private:
-
     virtual QNetworkRequest encode(const Request &r);
     virtual QNetworkReply* sendPut(const QNetworkRequest &req, const QByteArray &payload);
     virtual QNetworkReply* sendGet(const QNetworkRequest &req);

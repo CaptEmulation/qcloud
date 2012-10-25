@@ -1,5 +1,12 @@
 #include "qcloudlistresponse.h"
 
+/*!
+  \class QCloudListResponse
+  \brief foobar
+
+  foobar
+  */
+
 QCloudListResponse::QCloudListResponse(QObject *parent) :
     QObject(parent)
 {

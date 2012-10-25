@@ -8,7 +8,6 @@
 /*!
   \class QAmazonConnection
   \brief Implementation of the QCloudConnection interface for Amazon.
-  \module QCloud
 
   Constructor, parameters are as follows: host = the adress where the requests are sent, i.e. s3.amazonaws.com
                                           user = username in the service
@@ -16,6 +15,10 @@
                                           secret = the secret key obtained from the service
 
   \sa QCloudConnection
+ */
+
+/*!
+ * Constructor
  */
 QAmazonConnection::QAmazonConnection(QByteArray user, QByteArray password, QByteArray secret) {
     this->host = "s3.amazonaws.com";
@@ -25,6 +28,9 @@ QAmazonConnection::QAmazonConnection(QByteArray user, QByteArray password, QByte
     manager = new QNetworkAccessManager(this);
 }
 
+/*!
+ * Destructor
+ */
 QAmazonConnection::~QAmazonConnection() {
     manager->deleteLater();
 }
@@ -200,7 +206,7 @@ QCloudFile* QAmazonConnection::get(QString bucket, QString fileName) {
   getCloudDir gets the list of buckets in the cloud owned by the creator.
   */
 QList<QString> QAmazonConnection::getCloudDir() {
-    Request r;    
+    Request r;
     QNetworkReply *reply;
     r.headers.insert("verb", "GET");
     reply = sendGet(encode(r));
@@ -239,7 +245,11 @@ QList<QString> QAmazonConnection::getCloudDirContents(QString bucketName) {
 
 
 /*!
-  Amazon does not allow / and + in the signature, so replace them with this function.
+  \internal
+  \brief replaces / and + with their encoded values.
+
+  Amazon defines that + and / should be replaced from the hashed to %2F and %2B. This function
+  takes a pointer to the array and replaces the occurances.
   */
 void QAmazonConnection::replaceUnallowed(QByteArray *array) {
     array->replace('/', "%2F");
@@ -365,6 +375,12 @@ QList<QString> QAmazonConnection::parseCloudDirListings(QByteArray &message){
     return list;
 }
 
+/*!
+  \brief Parses message received from cloud and returns a list of blobs in a clouddir.
+
+  Parser method that returns a list of strings that contain the files included in the getBucketContents()
+  response.
+  */
 QList<QString> QAmazonConnection::parseCloudDirContentListing(QByteArray *message) {
     QXmlStreamReader reader;
     reader.addData(*message);

@@ -1,0 +1,12 @@
+/*!
+    \page gettingstarted.html
+    \title QCloud getting started
+    \keyword Introduction
+
+    Compiling:
+    \code
+    qmake CONFIG+=release
+    make
+    \endcode
+
+*/

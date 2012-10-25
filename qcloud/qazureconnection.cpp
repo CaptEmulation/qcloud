@@ -8,7 +8,6 @@ QAzureConnection::~QAzureConnection() {
 /*!
   \class QAzureConnection
   \brief Implementation of the interface QCloudConnection for Azure.
-  \module QCloud
 
   Constructor to create new QAzureConnections. This contains three parameters and all should be in the right format.
   The first parameter is QByteArray containing the url of the service i.e. "http://kikkare.blob.core.windows.net" where
@@ -46,7 +45,6 @@ void QAzureConnection::initializeHeaders() {
 }
 
 /*!
-  \fn QAzureConnection::initializeSharedKeyLiteHeaders()
   \internal
   \brief Initializes headers to be used with SharedKeyLite requests.
 */
@@ -58,7 +56,6 @@ void QAzureConnection::initializeSharedKeyLiteHeaders() {
 }
 
 /*!
-  \fn QAzureConnection::dateInRFC1123()
   \internal
   \brief Azure requires dates to be in RFC1123 format that Qt's QDateTime does not provide,
   so this helper provides it.
@@ -74,9 +71,6 @@ QString QAzureConnection::dateInRFC1123() {
     return httpDate;
 }
 
-/*!
- \reimp
-  */
 bool QAzureConnection::deleteBlob(QString name, QString bucket) {
     Request r;
     r.headers.insert("verb", "GET");
@@ -326,10 +320,6 @@ QCloudListResponse* QAzureConnection::asyncGetCloudDir() {
     return new QCloudListResponse(reply);
 }
 
-
-/*!
-  \reimp
-  */
 QNetworkRequest QAzureConnection::encode(const Request &r) {
     QString urlString("http://" + this->url);
 
@@ -435,9 +425,6 @@ QNetworkReply* QAzureConnection::sendHead(const QNetworkRequest &req) {
 }
 
 //PARSERS
-/*!
-  \reimp
-  */
 QList<QString> QAzureConnection::parseCloudDirListings(QByteArray &contents) {
     QXmlStreamReader reader;
     reader.addData(contents);
@@ -451,9 +438,6 @@ QList<QString> QAzureConnection::parseCloudDirListings(QByteArray &contents) {
     return foo;
 }
 
-/*!
-  \reimp
-  */
 QList<QString> QAzureConnection::parseCloudDirContentsListing(QByteArray &contents) {
     QXmlStreamReader reader;
     QList<QString> foo;

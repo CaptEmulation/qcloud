@@ -1,5 +1,11 @@
 #include "qcloudresponse.h"
 
+/*!
+  \class QCloudResponse
+
+  \brief QCloudResponse is used when QCloudConnection is used asynchronious.
+  */
+
 QCloudResponse::QCloudResponse(QObject *parent) : QObject(parent)
 {
     this->response = 0;

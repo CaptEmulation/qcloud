@@ -1,0 +1,36 @@
+/*!
+    \page classes.html
+    \title Cloud API
+    \keyword All Classes
+
+    Some explanation here...
+
+    \code
+    some example code here
+    \endcode
+
+    \raw HTML
+        <table cellpadding="2" cellspacing="1" border="0" width="100%" class="indextable">
+            <tr>
+                <th class="titleheader" width="25%">
+                    Common and global
+                </th>
+            </tr>
+            <tr>
+                <td valign="top">
+                    <ul>
+                    <li><a href="hmacsha.html">HmacSHA</a></li>
+                    <li><a href="qamazonconnection.html">QAmazonConnection</a></li>
+                    <li><a href="qazureconnection.html">QAzureConnection</a></li>
+                    <li><a href="qcloudconnection.html">QCloudConnection</a></li>
+                    <li><a href="qclouddir.html">QCloudDir</a></li>
+                    <li><a href="qcloudfile.html">QCloudFile</a></li>
+                    <li><a href="qclouditem.html">QCloudItem</a></li>
+                    <li><a href="qcloudlistresponse.html">QCloudListResponse</a></li>
+                    <li><a href="qcloudresponse.html">QCloudResponse</a></li>
+                </td>
+            </tr>
+        </table>
+    \endraw
+
+*/

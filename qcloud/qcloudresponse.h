@@ -3,12 +3,7 @@
 
 #include <QObject>
 #include <QNetworkReply>
-/*!
-  \author Jarkko Laitinen
-  \module QCloud
 
-  \brief QCloudResponse is used when QCloudConnection is used asynchronious.
-  */
 class QCloudResponse : public QObject
 {
     Q_OBJECT

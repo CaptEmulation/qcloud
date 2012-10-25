@@ -1,0 +1,16 @@
+/*!
+    \page examples.html
+    \keyword Examples
+
+    \raw HTML
+    <div class="qcloud">
+
+    <table>
+        <tr>
+            <td><a href="examples-qcloudexplorer.html">QCloudExplorer</a></td>
+        </tr>
+    </table>
+    </div>
+    \endraw
+
+*/

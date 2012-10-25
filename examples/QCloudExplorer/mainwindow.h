@@ -1,15 +1,18 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+//#include <QtWidgets/QMainWindow>
+//#include <QtWidgets/QProgressDialog>
+//#include <QtWidgets/QDialog>
 #include <QMainWindow>
-#include "../QCloud/qamazonconnection.h"
-#include "../QCloud/qcloudresponse.h"
-#include "../QCloud/qclouddir.h"
-#include "../QCloud/qazureconnection.h"
 #include <QProgressDialog>
+#include <QDialog>
 #include <QDebug>
 #include <QSettings>
-#include <QDialog>
+#include "qamazonconnection.h"
+#include "qcloudresponse.h"
+#include "qclouddir.h"
+#include "qazureconnection.h"
 #include "qsettingsdialog.h"
 
 namespace Ui {
@@ -19,11 +22,11 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    
+
 private:
     Ui::MainWindow *ui;
     QCloudConnection *cloud;

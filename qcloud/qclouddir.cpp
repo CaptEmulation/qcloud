@@ -1,5 +1,14 @@
 #include "qclouddir.h"
 
+
+/*!
+  \class QCloudDir
+  \brief Cloud directory
+
+  Implementation of the QCloudItem interface. QCloudBucket will be the logical match to QDir. QCloudBucket will know its properties
+  and the user can ask for files located inside it.
+  */
+
 QCloudDir::QCloudDir(QDir &dir){
     contents = QList<QCloudFile *>();
     createFromALocalDirectory(dir);
