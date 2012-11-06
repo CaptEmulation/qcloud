@@ -3,25 +3,51 @@
 /*!
   \class QCloudResponse
 
-  \brief QCloudResponse is used when QCloudConnection is used asynchronious.
+  \brief QCloudResponse is the container for a boolean value received from a cloud
+  service. It contains the information was the operation success or failure.
   */
-
-QCloudResponse::QCloudResponse(QObject *parent) : QObject(parent)
-{
-    this->response = 0;
+QCloudResponse::QCloudResponse(QNetworkReply *reply) {
+    this->reply = reply;
+    connect(reply, SIGNAL(finished()), this, SLOT(requestFinished()));
     this->errorCount = 0;
+    this->response = "";
+    this->errorMsg = "";
 }
 
-QCloudResponse::QCloudResponse(QByteArray &response, int &error, QCloudResponse::RESPONSETYPE t) {
-    this->response = response;
-    this->errorCount = error;
-    this->type = t;
-}
-
+/*!
+  \brief Returns the response from cloud. Response has not been parsed
+  */
 QByteArray QCloudResponse::getResponse() {
     return this->response;
 }
 
-QCloudResponse::RESPONSETYPE QCloudResponse::getResponseType() {
-    return this->type;
+/*!
+  \brief Private slot that checks if the request was success or failure.
+  */
+void QCloudResponse::requestFinished() {
+    if (this->reply->error() == 0) {
+        this->errorCount = 0;
+        response = reply->readAll();
+        reply->deleteLater();
+        emit finished();
+    } else {
+        this->errorCount = this->reply->error();
+        response = reply->readAll();
+        errorMsg = reply->errorString().toUtf8();
+        reply->deleteLater();
+        emit cloudError();
+    }
+}
+
+/*!
+  \brief Returns the error message.
+  */
+QByteArray QCloudResponse::getError() {
+    if (this->error() == 0) {
+        return QByteArray("");
+    }
+    else
+    {
+        return this->errorMsg;
+    }
 }

@@ -19,11 +19,6 @@ class QAmazonConnection : public QCloudConnection
 public:
     QAmazonConnection(QByteArray user, QByteArray password, QByteArray secret);
     ~QAmazonConnection();
-
-    /**
-      The next virtual functions are inherited from QCloudConnection. These function as detailed in QCloudConnection
-      but differences are detailed here.
-      */
     virtual QCloudFile* get(QString bucket, QString fileName);
     virtual bool get(QCloudDir &d);
     virtual bool put(QCloudFile &f, QString bucket);
@@ -32,18 +27,10 @@ public:
     virtual QList<QString> getCloudDirContents(QString bucketName);
     virtual bool deleteBlob(QString name, QString bucket);
     virtual bool deleteCloudDir(QString bucket);
-    QCloudFileResponse* asyncGetCloudFile(QString bucket, QString fileName);
-    QCloudListResponse* asyncGetCloudDir();
-    QCloudListResponse* asyncGetCloudDirContents(QString cloudDir);
+    virtual QCloudFileResponse* asyncGetCloudFile(QString &bucket, QString &fileName);
+    virtual QCloudListResponse* asyncGetCloudDir();
+    virtual QCloudListResponse* asyncGetCloudDirContents(QString &cloudDir);
     QList<QString> parseCloudDirContentListing(QByteArray *array);
-
-    /*!
-      \fn QAmazonConnection::parseCLoudDirListing
-      \brief Takes an Bytearray containing the reply from cloud and returns a list of qclouddirs in the cloud.
-
-      Parser method that uses QXmlStreamReader to find the buckets from getBuckets() listing. Returns list of the
-      buckets in the users account.
-      */
     QList<QString> parseCloudDirListings(QByteArray &message);
     virtual bool createCloudDir(const QString &dirName);
     virtual bool cloudDirExists(const QString &dirName);
@@ -72,9 +59,9 @@ private:
 signals:
     void valueChanged(int);
     void setRange(int,int);
+    void finished();
+    void cloudError();
 
-private slots:
-    virtual void requestFinished(QNetworkReply*);
 
 };
 

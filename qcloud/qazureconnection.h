@@ -19,14 +19,8 @@ public:
     ~QAzureConnection();
     QAzureConnection(QByteArray url, QByteArray authentication, QByteArray storageKey);
 
-    /**
-      At the moment this is nofunc as it always returns false.
-      */
-    virtual bool put(QCloudFile &f, QString bucket);
 
-    /**
-      put(QCloudTable) is nofunc at the moment.
-      */
+    virtual bool put(QCloudFile &f, QString bucket);
     virtual bool put(QCloudDir &dir);
     virtual QList<QString> getCloudDir();
     virtual QList<QString> getCloudDirContents(QString bucketName);
@@ -38,9 +32,9 @@ public:
     virtual bool cloudDirExists(const QString &dirName);
     virtual  bool createCloudDir(const QString &dirName);
 
-    QCloudFileResponse* asyncGetCloudFile(QString bucket, QString fileName);
-    QCloudListResponse* asyncGetCloudDir();
-    QCloudListResponse* asyncGetCloudDirContents(QString cloudDir);
+    virtual QCloudFileResponse* asyncGetCloudFile(QString &bucket, QString &fileName);
+    virtual QCloudListResponse* asyncGetCloudDir();
+    virtual QCloudListResponse* asyncGetCloudDirContents(QString &cloudDir);
 
 private:
     virtual QNetworkRequest encode(const Request &r);

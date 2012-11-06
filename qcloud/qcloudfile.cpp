@@ -9,14 +9,14 @@
 
 
 /*!
-  Sets the file as being local or not with the boolean  \a isLocal.
+  \brief Sets the file as being local or not with the boolean  \a isLocal.
   */
 void QCloudFile::setLocal(bool isLocal) {
     this->local = isLocal;
 }
 
 /*!
-  Creates a new QCloudFile with the name \a name.
+  \brief Creates a new QCloudFile with the name \a name.
   */
 QCloudFile::QCloudFile(QString fileName) {
     this->setLocal(false);
@@ -25,18 +25,18 @@ QCloudFile::QCloudFile(QString fileName) {
 }
 
 /*!
-   Creates a new QCloudFile and a local file named \a fileName. Also creates a local file containing \a contents.
+   \brief Creates a new QCloudFile and a local file named \a fileName. Also creates a local file containing \a contents.
   */
 QCloudFile::QCloudFile(QByteArray contents, QString fileName) {
     this->contents = contents;
-    QFile f(fileName);
+    QString name = (fileName != "") ? fileName : "tempfile";
+
+    QFile f(name);
     if (f.exists()) {
-        qDebug() << "file exists so overwriting";
         f.remove();
     }
 
     if (!f.open(QIODevice::ReadWrite | QFile::Text)) {
-        qDebug() << "complications opening the file";
     }
     f.write(contents);
     f.close();
@@ -45,22 +45,26 @@ QCloudFile::QCloudFile(QByteArray contents, QString fileName) {
 }
 
 /*!
-  Same as the previous constructor but uses the \a bucket as a directory for the file.
+  \brief Same as the previous constructor but uses the \a bucket as a directory for the file.
   */
 QCloudFile::QCloudFile(QByteArray contents, QString fileName, QString bucket)
 {
     this->contents = contents;
-    QString filepath = bucket + "/" + fileName;
-    qDebug() << filepath;
+    QString filepath;
+    if (fileName != "") {
+        filepath = bucket + "/" + fileName;
+    } else {
+        filepath = "tempfile";
+    }
+
     QFile f(filepath);
 
     if (f.exists()) {
-        qDebug() << "file exists so overwriting";
-        f.remove();
+         f.remove();
     }
 
     if (!f.open(QIODevice::ReadWrite | QFile::Text)) {
-        qDebug() << "complications opening the file";
+
     }
     f.write(contents);
     f.close();
@@ -69,6 +73,8 @@ QCloudFile::QCloudFile(QByteArray contents, QString fileName, QString bucket)
 }
 
 /*!
+  \brief Creates a new QCloudFile using a QFile.
+
   When creating QCloudFile using the constructor that takes QFile as a parameter it reads the contents of the
   file to a byte array inside the QCloudFile. This is the default constructor to be used when creating cloudfiles
   from the local filesystem.
@@ -97,10 +103,15 @@ bool QCloudFile::isLocal() {
 }
 
 /*!
-  If the file is local returns the contents of the file, else QByteArray("")
+  \brief If the file is local returns the contents of the file, else QByteArray("")
   */
 QByteArray QCloudFile::getContents() {
-    return this->contents;
+    if (this->isLocal()) {
+        return this->contents;
+    }
+    else {
+        return QByteArray("");
+    }
 }
 
 /*!
@@ -111,7 +122,7 @@ QString QCloudFile::getName() {
 }
 
 /*!
-  Returns the file size of this QCF
+  \brief Returns the file size of this QCF
   */
 qint64 QCloudFile::getSize() {
     return this->size;

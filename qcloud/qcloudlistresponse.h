@@ -11,23 +11,27 @@
 class QCloudListResponse : public QObject
 {
     Q_OBJECT
+
 public:
-    explicit QCloudListResponse(QObject *parent = 0);
     QList<QString> getParsed();
     QCloudListResponse(QNetworkReply *reply);
     int error();
     QByteArray getUnparsed();
+
 private:
     QNetworkReply *reply;
     QList<QString> list;
     QString errorMsg;
     int nro;
     QByteArray unparsed;
+    bool parsed;
+
 signals:
     void finished();
-    void someError();
+    void cloudError();
+
 private slots:
     void requestFinished();
 };
 
-#endif // QCLOUDLISTRESPONSE_H
+#endif

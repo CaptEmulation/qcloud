@@ -8,20 +8,23 @@ class QCloudResponse : public QObject
 {
     Q_OBJECT
 public:
-    enum RESPONSETYPE { CLOUDDIR, CLOUDDIRCONTENTS, CLOUDFILE };
-    explicit QCloudResponse(QObject *parent = 0);
-    QCloudResponse(QByteArray &contents, int &errorCount, RESPONSETYPE t);
+    QCloudResponse(QNetworkReply *reply);
     QByteArray getResponse();
     int error();
-    QCloudResponse::RESPONSETYPE getResponseType();
+    QByteArray getError();
+
 signals:
     void finished();
+    void cloudError();
+
+private slots:
+    void requestFinished();
+
 private:
     QByteArray response;
     int errorCount;
-    QCloudResponse::RESPONSETYPE type;
+    QByteArray errorMsg;
     QNetworkReply *reply;
-
 };
 
-#endif // QCLOUDRESPONSE_H
+#endif

@@ -14,19 +14,16 @@ public:
     QCloudDir(QDir &dir);
     QCloudDir(const QList<QString> &files, QString path);
 
-    QList<QString> getCloudDirContentsAsString();
-    void add(QCloudFile* file);
+    virtual bool isLocal();
     QCloudFile* get(int at);
 
-    /**
-      If one of the files is not local then returns false, otherwise true. If
-      the folder contains no files returns true
-      */
-    virtual bool isLocal();
+    QList<QString> getCloudDirContentsAsString();
     QList<QCloudFile *>* getContents();
+    void add(QCloudFile* file);
+
     QString getPath();
-    void setContents(QList<QCloudFile *> *files);
     int size();
+
 private:
     QList<QCloudFile *> contents;
     QString path;
@@ -37,4 +34,4 @@ signals:
     void transferFinished();
 };
 
-#endif // QCLOUDDIR_Hcontext
+#endif

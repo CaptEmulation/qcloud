@@ -7,7 +7,9 @@
 #include "hmacsha.h"
 #include "qcloudfile.h"
 #include "qcloudresponse.h"
+#include "qcloudfileresponse.h"
 
+class QCloudListResponse;
 class QCloudDir;
 
 class QCloudConnection : public QObject
@@ -31,6 +33,9 @@ public:
     virtual bool createCloudDir(const QString &dirName) = 0;
     virtual void setOverrideLocal(bool value) = 0;
     virtual void setOverrideCloud(bool value) = 0;
+    virtual QCloudFileResponse* asyncGetCloudFile(QString &bucket, QString &fileName);
+    virtual QCloudListResponse* asyncGetCloudDir();
+    virtual QCloudListResponse* asyncGetCloudDirContents(QString &cloudDir);
 
 protected:
     QCloudConnection();
@@ -47,7 +52,6 @@ signals:
     void failed();
     void getCloudDirFinished();
     void putCloudDirFinished();
-    void cloudRequestFinished(QCloudResponse*);
 };
 
 #endif // QCLOUDCONNECTION_H

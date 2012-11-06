@@ -395,36 +395,7 @@ QList<QString> QAmazonConnection::parseCloudDirContentListing(QByteArray *messag
     return files;
 }
 
-/*
-QCloudResponse::RESPONSETYPE QAmazonConnection::findType(QNetworkReply &reply, QByteArray &contents) {
-    contents = reply.readAll();
-    QXmlStreamReader reader;
-    reader.addData(contents);
-    reader.readNextStartElement();
-    qDebug() << reader.name().toString();
-    if (reader.name().toString() == "ListAllMyBucketsResult") {
-        return QCloudResponse::CLOUDDIR;
-    } else if (reader.name().toString() == "ListBucketResult") {
-               return QCloudResponse::CLOUDDIRCONTENTS;
-    } else return QCloudResponse::CLOUDFILE;
-}
-*/
-
 //SLOTS
-void QAmazonConnection::requestFinished(QNetworkReply *reply) {
-    int error = reply->error();
-    QCloudResponse::RESPONSETYPE type;
-    QByteArray cont = "";
-    if (error == 0) {
-        type = QCloudResponse::CLOUDDIR;
-    } else {
-        cont = reply->readAll();
-        type = QCloudResponse::CLOUDDIR;
-    }
-    QCloudResponse *resp = new QCloudResponse(cont, error, type);
-    reply->deleteLater();
-    emit cloudRequestFinished(resp);
-}
 
 
 QCloudListResponse* QAmazonConnection::asyncGetCloudDir() {
@@ -439,7 +410,7 @@ QCloudListResponse* QAmazonConnection::asyncGetCloudDir() {
     return new QCloudListResponse(reply);
 }
 
-QCloudListResponse* QAmazonConnection::asyncGetCloudDirContents(QString cloudDir) {
+QCloudListResponse* QAmazonConnection::asyncGetCloudDirContents(QString &cloudDir) {
     Request r;
     QNetworkReply *reply;
     QNetworkRequest req;
@@ -450,7 +421,7 @@ QCloudListResponse* QAmazonConnection::asyncGetCloudDirContents(QString cloudDir
     return new QCloudListResponse(reply);
 }
 
-QCloudFileResponse* QAmazonConnection::asyncGetCloudFile(QString bucket, QString fileName) {
+QCloudFileResponse* QAmazonConnection::asyncGetCloudFile(QString &bucket, QString &fileName) {
     Request r;
     QNetworkReply *reply;
     QNetworkRequest req;

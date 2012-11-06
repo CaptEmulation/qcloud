@@ -16,6 +16,7 @@ public:
     QCloudFile(QByteArray contents, QString fileName, QString bucket);
 
     virtual bool isLocal();
+
     QString getName();
     qint64 getSize();
     QByteArray getContents();
@@ -30,4 +31,4 @@ private:
 
 };
 
-#endif // QCLOUDFILE_H
+#endif

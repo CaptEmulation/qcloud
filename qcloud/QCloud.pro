@@ -6,6 +6,12 @@ TEMPLATE = lib
 CONFIG -= app_bundle
 CONFIG += staticlib
 LIBS += qcloud.lib
+
+
+debug: DESTDIR = qcloud/debug/
+release: DESTDIR = qcloud/release/
+
+
 SOURCES += \
     qclouditem.cpp \
     qcloudfile.cpp \

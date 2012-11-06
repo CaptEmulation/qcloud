@@ -18,5 +18,10 @@ QCloudItem::QCloudItem(QObject *parent) :
 
 /*!
   \fn QCloudItem::isLocal()
-  if the file is local as in QFile f("foo.txt") this should return true, else it will return false.
+  \brief The only method to be implemented. If the file has local content this should be set to true else false
+
+  \example QCloudFile* file = new QCloudFile(QString("cloudFile");
+           file->isLocal() = false;
+           QCloudFile* f2 = new QCloudFile(QByteArray("sdfasdf"), QString("localFile");
+           f2->isLocal() = true;
   */

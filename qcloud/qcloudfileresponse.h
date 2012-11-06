@@ -16,11 +16,14 @@ public:
     void setFileName(QString name);
     void setCloudDir(QString name);
     int error();
+
 signals:
     void finished();
     void failed();
+
 private slots:
     void replyFinished();
+
 private:
     QNetworkReply *own;
     QCloudFile* file;
@@ -31,4 +34,4 @@ private:
     int errorno;
 };
 
-#endif // QCLOUDFILERESPONSE_H
+#endif

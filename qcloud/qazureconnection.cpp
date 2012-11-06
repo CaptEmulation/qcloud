@@ -281,7 +281,7 @@ QCloudFile* QAzureConnection::get(QString bucket, QString name){
     return f;
 }
 
-QCloudFileResponse* QAzureConnection::asyncGetCloudFile(QString bucket, QString fileName) {
+QCloudFileResponse* QAzureConnection::asyncGetCloudFile(QString &bucket, QString &fileName) {
     Request r;
     QNetworkReply *reply;
 
@@ -296,7 +296,7 @@ QCloudFileResponse* QAzureConnection::asyncGetCloudFile(QString bucket, QString 
 }
 
 
-QCloudListResponse* QAzureConnection::asyncGetCloudDirContents(QString cloudDir) {
+QCloudListResponse* QAzureConnection::asyncGetCloudDirContents(QString &cloudDir) {
     Request r;
     QNetworkReply *reply;
     r.headers.insert("verb", "GET");

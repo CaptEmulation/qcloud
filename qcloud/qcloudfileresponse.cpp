@@ -1,11 +1,24 @@
 #include "qcloudfileresponse.h"
 
+/*!
+  \class QCloudFileResponse
+  \brief Response class for file objects. Connects reply to a private slot, where, after
+  finished has been emitted, creates a new CloudFile to the right location.
 
+  If using QCFR the developer needs to set the cloudDir using setCloudDir and fileName
+  using setFileName, as they are needed to create the file. Unless they are set filename
+  of the file will be tempfile.
+  */
 QCloudFileResponse::QCloudFileResponse(QNetworkReply *reply) {
     this->own = reply;
     connect(reply, SIGNAL(finished()), SLOT(replyFinished()));
+    this->bucket = "";
+    this->filename = "";
 }
 
+/*!
+
+  */
 void QCloudFileResponse::setCloudDir(QString name) {
     this->bucket = name;
 }
