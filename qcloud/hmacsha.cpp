@@ -30,7 +30,6 @@ HmacSHA::HmacSHA(QObject *parent) : QObject(parent){}
   */
 QByteArray HmacSHA::hash(HmacSHAType t, QByteArray stringToSign, QByteArray secretKey){
 
-
     QCryptographicHash::Algorithm alg = (t == SHA1) ? QCryptographicHash::Sha1 : QCryptographicHash::Sha256;
 
     int blockSize = 64; // HMAC-SHA-1 & SHA-256 Blocksize
@@ -47,8 +46,6 @@ QByteArray HmacSHA::hash(HmacSHAType t, QByteArray stringToSign, QByteArray secr
     }
     QByteArray innerPadding(blockSize, char(0x36));
     QByteArray outerPadding(blockSize, char(0x5c));
-
-
 
     for (int i = 0; i < secretKey.length(); i++) {
         innerPadding[i] = innerPadding[i] ^ secretKey.at(i);

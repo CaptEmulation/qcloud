@@ -1,9 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-//#include <QtWidgets/QMainWindow>
-//#include <QtWidgets/QProgressDialog>
-//#include <QtWidgets/QDialog>
 #include <QMainWindow>
 #include <QProgressDialog>
 #include <QDialog>
@@ -33,20 +30,14 @@ private:
     QProgressDialog *dialog;
     QSettingsDialog *settingsdialog;
 private slots:
-    //void requestFinished(QCloudResponse*);
     void on_connectButton_clicked();
     void on_getButton_clicked();
     void on_putButton_clicked();
-    void putRequestFinished();
-    void getRequestFinished();
     void settingsUpdated();
     void cancelClicked();
     void on_settingsButton_clicked();
     void updateLocal();
     void updateCloud();
-    void cloudListRequestFinished();
-    void cloudRequestFinished();
-    void cloudFileRequestFinished();
 };
 
 #endif // MAINWINDOW_H

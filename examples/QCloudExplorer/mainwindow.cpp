@@ -34,17 +34,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::cloudFileRequestFinished() {
-
-}
-
-void MainWindow::cloudListRequestFinished() {
-
-}
-
-void MainWindow::cloudRequestFinished() {
-
-}
 
 void MainWindow::on_connectButton_clicked()
 {
@@ -74,12 +63,7 @@ void MainWindow::on_getButton_clicked()
     connect(cloud, SIGNAL(getCloudDirFinished()), this, SLOT(updateLocal()));
     QString whatToGet = ui->cloudDirectory->selectionModel()->selectedIndexes().at(0).data().toString();
 
-    /*
-    QDir d(whatToGet);
-    if (!d.exists()) {
-        d.mkdir(".");
-    }
-    */
+
     QCloudDir dir(whatToGet);
 
     dialog.show();
@@ -96,18 +80,29 @@ void MainWindow::on_putButton_clicked()
     connect(cloud, SIGNAL(putCloudDirFinished()), dialog, SLOT(close()));
     connect(cloud, SIGNAL(putCloudDirFinished()), this, SLOT(updateCloud()));
 
+
     QString whatToPut = ui->localDirectory->selectionModel()->selectedIndexes().at(0).data().toString();
-    QDir dir(whatToPut);
-    QCloudDir cloudDir(dir);
-    dialog->show();
-    cloud->put(cloudDir);
-}
-
-void MainWindow::putRequestFinished() {
-
-}
-
-void MainWindow::getRequestFinished() {
+    QFileInfo info(whatToPut);
+    qDebug() << info.absolutePath();
+    if(info.isFile()) {
+        if (ui->cloudDirectory->selectionModel()->selectedIndexes().size() == 0) {
+            QList<QString> list = cloud->getCloudDir();
+            QFile f(whatToPut);
+            QCloudFile fa(f);
+            QString bucket = list.at(0);
+            cloud->put(fa, bucket);
+        } else {
+            QString whereToPut = ui->cloudDirectory->selectionModel()->selectedIndexes().at(0).data().toString();
+            QFile f(whatToPut);
+            QCloudFile fa(f);
+            cloud->put(fa, whereToPut);
+        }
+    } else {
+        QDir dir(whatToPut);
+        QCloudDir cloudDir(dir);
+        dialog->show();
+        cloud->put(cloudDir);
+    }
 
 }
 

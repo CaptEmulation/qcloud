@@ -388,8 +388,6 @@ QList<QString> QAmazonConnection::parseCloudDirContentListing(QByteArray *messag
 }
 
 //SLOTS
-
-
 QCloudListResponse* QAmazonConnection::asyncGetCloudDir() {
     Request r;
     QNetworkReply *reply;
