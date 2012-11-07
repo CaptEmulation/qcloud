@@ -33,7 +33,7 @@ private:
     QProgressDialog *dialog;
     QSettingsDialog *settingsdialog;
 private slots:
-    void requestFinished(QCloudResponse*);
+    //void requestFinished(QCloudResponse*);
     void on_connectButton_clicked();
     void on_getButton_clicked();
     void on_putButton_clicked();
@@ -44,6 +44,9 @@ private slots:
     void on_settingsButton_clicked();
     void updateLocal();
     void updateCloud();
+    void cloudListRequestFinished();
+    void cloudRequestFinished();
+    void cloudFileRequestFinished();
 };
 
 #endif // MAINWINDOW_H

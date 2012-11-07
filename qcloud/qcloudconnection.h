@@ -33,9 +33,9 @@ public:
     virtual bool createCloudDir(const QString &dirName) = 0;
     virtual void setOverrideLocal(bool value) = 0;
     virtual void setOverrideCloud(bool value) = 0;
-    virtual QCloudFileResponse* asyncGetCloudFile(QString &bucket, QString &fileName);
-    virtual QCloudListResponse* asyncGetCloudDir();
-    virtual QCloudListResponse* asyncGetCloudDirContents(QString &cloudDir);
+    virtual QCloudFileResponse* asyncGetCloudFile(QString &bucket, QString &fileName) = 0;
+    virtual QCloudListResponse* asyncGetCloudDir() = 0;
+    virtual QCloudListResponse* asyncGetCloudDirContents(QString &cloudDir) = 0;
 
 protected:
     QCloudConnection();

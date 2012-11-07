@@ -90,8 +90,8 @@ bool QAmazonConnection::cloudDirExists(const QString &dirName) {
     r.headers.insert("bucket", dirName);
     QNetworkReply *reply = sendHead(encode(r));
     if (reply->error() != 0) {
-        qDebug() << QString("CloudDir %1 does not exist").arg(dirName);
-        return false;
+       return false;
+       emit cloudError();
     }
     return true;
 }
@@ -101,7 +101,6 @@ bool QAmazonConnection::cloudDirExists(const QString &dirName) {
   the whole directory is overridden else only the new files are uploaded.
   */
 bool QAmazonConnection::put(QCloudDir &d) {
-    disconnect(manager, 0, this, 0);
     QString path = d.getPath();
 
     if (!cloudDirExists(path)) {
@@ -131,7 +130,7 @@ bool QAmazonConnection::put(QCloudDir &d) {
     }
 
     emit putCloudDirFinished();
-    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(requestFinished(QNetworkReply*)));
+
     return true;
 }
 
@@ -143,21 +142,15 @@ bool QAmazonConnection::put(QCloudDir &d) {
 bool QAmazonConnection::get(QCloudDir &d) {
 
     QString path = d.getPath();
-    QDir local(path);
-    if (local.exists()) {
-        local.rename(local.dirName(), local.dirName()+"new");
-    }
-    qDebug() << QString("Getting QCD %1").arg(path);
-    disconnect(manager, 0, this, 0);
-
     QList<QString> files = getCloudDirContents(path);
-    int size = files.length();
-    emit setRange(0, files.length());
+    int size = files.size();
+    emit setRange(0, size);
 
-    if (!overrideLocal) {
-        QList<QString> localFiles = d.getCloudDirContentsAsString();
+    QList<QString> localFiles = d.getCloudDirContentsAsString();
+
+    if (!overrideLocal && localFiles.size() > 0) {
         for (int i = 0; i < size; i++) {
-            if (!files.contains(localFiles.at(i))) {
+            if (!localFiles.contains(files.at(i))) {
                 d.add(get(path, files.at(i)));
                 emit valueChanged(i);
             }
@@ -172,7 +165,6 @@ bool QAmazonConnection::get(QCloudDir &d) {
     }
 
     emit getCloudDirFinished();
-    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(requestFinished(QNetworkReply*)));
     return true;
 }
 
@@ -189,15 +181,15 @@ QCloudFile* QAmazonConnection::get(QString bucket, QString fileName) {
 
 
     QNetworkReply *reply = sendGet(encode(r));
-    reply->deleteLater();
     if (reply->error() != 0) {
         qDebug() << reply->errorString();
         qDebug() << reply->readAll();
+        qDebug() << "error from get";
         emit failed();
         return new QCloudFile("", fileName, bucket);
     }
     QCloudFile* file = new QCloudFile(reply->readAll(), fileName, bucket);
-    emit finished();
+    reply->deleteLater();
     return file;
 
 }

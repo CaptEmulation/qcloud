@@ -19,11 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
                                           s.value("secretkey").toByteArray());
         } else {
             cloud = new QAzureConnection(s.value("username").toByteArray(), s.value("accesskey").toByteArray(), s.value("secretkey").toByteArray());
+
         }
-        connect(cloud, SIGNAL(cloudRequestFinished(QCloudResponse*)), this, SLOT(requestFinished(QCloudResponse*)));
-        qDebug() << s.value("username").toByteArray();
-        qDebug() << s.value("accesskey").toByteArray();
-        qDebug() << s.value("secretkey").toByteArray();
     }
     else {
         ui->connectButton->setEnabled(false);
@@ -37,25 +34,16 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::requestFinished(QCloudResponse *resp) {
-    QCloudResponse::RESPONSETYPE t = resp->getResponseType();
-    qDebug() << QString("requestFinished() with type of %1").arg(t);
+void MainWindow::cloudFileRequestFinished() {
 
-    switch (t) {
-        case QCloudResponse::CLOUDDIR : {
-        qDebug() << "in asdfasdfasdf";
-        QByteArray data = resp->getResponse();
-        QList<QString> contents = cloud->parseCloudDirListings(data);
-        ui->cloudDirectory->setModel(new QStringListModel(contents));
-        break;
-    }
-    case QCloudResponse::CLOUDDIRCONTENTS: {
+}
 
-        break;
-    }
-    case QCloudResponse::CLOUDFILE:
-        break;
-    }
+void MainWindow::cloudListRequestFinished() {
+
+}
+
+void MainWindow::cloudRequestFinished() {
+
 }
 
 void MainWindow::on_connectButton_clicked()
@@ -78,7 +66,6 @@ void MainWindow::on_connectButton_clicked()
 
 void MainWindow::on_getButton_clicked()
 {
-    disconnect(cloud, 0, this, 0);
     QProgressDialog dialog(this);
     dialog.setLabelText("Downloading");
     connect(cloud, SIGNAL(setRange(int,int)), &dialog, SLOT(setRange(int,int)));
@@ -87,17 +74,21 @@ void MainWindow::on_getButton_clicked()
     connect(cloud, SIGNAL(getCloudDirFinished()), this, SLOT(updateLocal()));
     QString whatToGet = ui->cloudDirectory->selectionModel()->selectedIndexes().at(0).data().toString();
 
+    /*
     QDir d(whatToGet);
     if (!d.exists()) {
         d.mkdir(".");
     }
-    QCloudDir dir(d);
+    */
+    QCloudDir dir(whatToGet);
+
     dialog.show();
     cloud->get(dir);
 }
 
 void MainWindow::on_putButton_clicked()
 {
+
     dialog = new QProgressDialog();
     dialog->setLabelText("Uploading");
     connect(cloud, SIGNAL(setRange(int,int)), dialog, SLOT(setRange(int,int)));
@@ -137,7 +128,6 @@ void MainWindow::settingsUpdated() {
     cloud->setOverrideCloud(overrideCloud);
     cloud->setOverrideLocal(overrideLocal);
 
-    connect(cloud, SIGNAL(cloudRequestFinished(QCloudResponse*)), this, SLOT(requestFinished(QCloudResponse*)));
     ui->getButton->setEnabled(true);
     ui->putButton->setEnabled(true);
 }

@@ -1,5 +1,5 @@
 QT += core \
-    network
+network
 QT -= gui
 TARGET = QCloud
 TEMPLATE = lib
@@ -8,28 +8,31 @@ CONFIG += staticlib
 LIBS += qcloud.lib
 
 
-debug: DESTDIR = qcloud/debug/
-release: DESTDIR = qcloud/release/
+CONFIG(debug, debug|release) {
+    DESTDIR =./debug/
+} else {
+    DESTDIR =./release/
+}
 
 
 SOURCES += \
-    qclouditem.cpp \
-    qcloudfile.cpp \
-    qamazonconnection.cpp \
-    qazureconnection.cpp \
-    hmacsha.cpp \
-    qclouddir.cpp \
-    qcloudresponse.cpp \
-    qcloudconnection.cpp \
-    qcloudlistresponse.cpp \
-    qcloudfileresponse.cpp
+           qclouditem.cpp \
+           qcloudfile.cpp \
+           qamazonconnection.cpp \
+           qazureconnection.cpp \
+           hmacsha.cpp \
+           qclouddir.cpp \
+           qcloudresponse.cpp \
+           qcloudconnection.cpp \
+           qcloudlistresponse.cpp \
+           qcloudfileresponse.cpp
 HEADERS += qclouditem.h \
-    qcloudfile.h \
-    qcloudconnection.h \
-    qamazonconnection.h \
-    qazureconnection.h \
-    hmacsha.h \
-    qclouddir.h \
-    qcloudresponse.h \
-    qcloudlistresponse.h \
-    qcloudfileresponse.h
+           qcloudfile.h \
+           qcloudconnection.h \
+           qamazonconnection.h \
+           qazureconnection.h \
+           hmacsha.h \
+           qclouddir.h \
+           qcloudresponse.h \
+           qcloudlistresponse.h \
+           qcloudfileresponse.h

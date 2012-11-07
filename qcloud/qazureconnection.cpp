@@ -196,10 +196,12 @@ bool QAzureConnection::get(QCloudDir &d) {
     QString path = d.getPath();
     QList<QString> contents;
     int size;
+
     if (d.isLocal()) {
         contents = d.getCloudDirContentsAsString();
         size = contents.size();
         emit setRange(0, size);
+
         if(!overrideLocal) {
             QList<QString> cloudContents = getCloudDirContents(d.getPath());
             int cloudsize = cloudContents.size();

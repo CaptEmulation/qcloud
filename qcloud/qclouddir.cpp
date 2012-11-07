@@ -15,14 +15,28 @@ QCloudDir::QCloudDir(QDir &dir){
 }
 
 /*!
+   \brief Creates a new QCloudDir from QString \a name, also creates the local directory if it does not exist.
+ */
+QCloudDir::QCloudDir(QString name) {
+    QDir d(name);
+    if (!d.exists()) {
+        d.mkpath(".");
+        this->path = name;
+    } else {
+        createFromALocalDirectory(d);
+    }
+}
+
+/*!
   \brief creates a new QCloudDir from a QDir,
   */
 void QCloudDir::createFromALocalDirectory(QDir &d) {
     this->path = d.dirName();
     d.setFilter(QDir::Files);
     QFileInfoList list = d.entryInfoList();
-    foreach (QFileInfo i , list) {
-        QFile f(path +"/"+ i.fileName());
+
+    for (int i = 0; i < list.size(); i++) {
+        QFile f(path +"/"+ list.at(i).fileName());
         contents.append(new QCloudFile(f));
     }
 }

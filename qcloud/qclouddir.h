@@ -5,6 +5,8 @@
 #include "qcloudfile.h"
 #include "qcloudconnection.h"
 #include <QDir>
+#include <QFileInfo>
+#include <QFileInfoList>
 
 class QCloudDir : public QCloudItem
 {
@@ -13,6 +15,7 @@ public:
 
     QCloudDir(QDir &dir);
     QCloudDir(const QList<QString> &files, QString path);
+    QCloudDir(QString name);
 
     virtual bool isLocal();
     QCloudFile* get(int at);

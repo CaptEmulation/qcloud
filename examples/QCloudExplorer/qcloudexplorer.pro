@@ -6,7 +6,7 @@
 
 QT       += core gui network widgets
 
-TARGET = QCloudExplorer
+TARGET = qcloudexplorer
 TEMPLATE = app
 
 SOURCES += \
