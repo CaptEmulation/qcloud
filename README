@@ -1,34 +1,18 @@
-Qt-Cloud
+QCloud-API
 
-Tarkoituksena on tuottaa helppo pilvi-API, jotta Qt-kehittäjät voivat helposti
-lisätä omiin ohjelmiinsa pilven tarjoamia palveluita (tällä hetkellä blob storage, ensi viikolla tulee
-vielä tablet). Tällä hetkellä toteutukset ovat Microsoftin Windows Azurelle ja Amazonin S3.
-Toteutuksien pitäis olla mahdollisimman "hyvin" tehtyjä, mutta oman C++/Qt kokemuksen 
-vähyyden takia kaikki ei ole välttämättä optimaalista. Tästä toivonkin että voisitte antaa palautetta. 
+QCloud-API provides public API to call Windows Azure and Amazon S3. 
 
-Ohjelman käyttö:
+Requirements:
+ Qt5 (tested with beta1)
 
-Kehittäjä lisää QCloud paketin omaan projektiinsa jonka jälkeen hän voi
-käyttää QCloudConnection-rajapinnan periviä QAmazonConnection ja QAzure-
-Connection -luokkia. Näiden avulla kehittäjä voi pyytää listauksia 
-pilvestä ja laittaa tiedostoja sinne jemmaan. Azuren dokumentaatiosta
-johtuen tällä hetkellä tiedostot eivät vielä perille asti mene, mutta varmaan
-viimeistään maanantaina se toimii. 
+Installation:
 
+Linux: (Tested: Debian 2.6.32-45)
+ qmake
+ make
 
 TODO:
+ todo
 
-Tulisiko ohjelmistoon lisätä vielä yksi abstraktion taso, jolloin kehittäjältä
-olisi piiloitettu em. manageri? Kehittäjä voisi käyttää vaan yleistä QCloud 
-luokkaa joka hoitaa kaiken piilossa.
-
-Tarkoituksena on myös finisoida taulukoiden säilöminen/hakeminen pilveen.
-
-Yritän tehdä jonkun pienimuotoisen esityksen teille maanantain koodikatselmukseen. 
-
-Ainiin, lisayksena kaytan talla hetkella itse kaannettya Qt 4.8.3 johon olen lisannyt Qt5.0sta
-QCryptographicHash luokan. Taten ohjelmaa ei pysty ajaa normaalilla qt asennuksella. Olen
-miettinyt etta pitaisiko kyseinen muutos kommitoida qtn versionhallintaan?
-
-
-
+If bugs are found please contact me at jlaitinen@gmail.com, please
+include [qcloud] in the header.
