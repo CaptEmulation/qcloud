@@ -83,8 +83,10 @@ void MainWindow::on_putButton_clicked()
 
     QString whatToPut = ui->localDirectory->selectionModel()->selectedIndexes().at(0).data().toString();
     QFileInfo info(whatToPut);
-    qDebug() << info.absolutePath();
+
     if(info.isFile()) {
+        connect(cloud, SIGNAL(finished()), dialog, SLOT(close()));
+        dialog->show();
         if (ui->cloudDirectory->selectionModel()->selectedIndexes().size() == 0) {
             QList<QString> list = cloud->getCloudDir();
             QFile f(whatToPut);

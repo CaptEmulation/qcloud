@@ -261,8 +261,10 @@ bool QAmazonConnection::put(QCloudFile &f, QString bucket) {
     QNetworkReply *reply = sendPut(encode(r), f.getContents());
     reply->deleteLater();
     if (reply->error() != 0) {
+        emit cloudError();
         return false;
     }
+    emit finished();
     return true;
 }
 
@@ -311,7 +313,9 @@ QNetworkRequest QAmazonConnection::encode(const Request &r) {
         url.addEncodedQueryItem("Content-Length", value.toAscii());
     }
     url.addEncodedQueryItem("Expires", timeString.toAscii());
-
+    qDebug() << "Urlstring : "<< urlString;
+    qDebug() << "URL: " << url.toString();
+    qDebug() << "stringToSign: " << QString(stringToSign);
     req.setUrl(url);
     return req;
 }
