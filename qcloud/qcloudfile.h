@@ -5,7 +5,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDebug>
-
+#include <QDir>
 class QCloudFile : public QCloudItem
 {
     Q_OBJECT

@@ -51,17 +51,21 @@ QCloudFile::QCloudFile(QByteArray contents, QString fileName, QString bucket)
 {
     this->contents = contents;
     QString filepath;
-
-    if (fileName != "" && bucket != "") {
-        filepath = bucket + "/" + fileName;
-    }
-    else if (fileName != "")
-    {
+    QDir foo(bucket);
+    if(!foo.exists()) {
         filepath = fileName;
-    }
-    else
-    {
-        filepath = "tempfile";
+    } else {
+        if (fileName != "" && bucket != "") {
+            filepath = bucket + "/" + fileName;
+        }
+        else if (fileName != "")
+        {
+            filepath = fileName;
+        }
+        else
+        {
+            filepath = "tempfile";
+        }
     }
 
     QFile f(filepath);
