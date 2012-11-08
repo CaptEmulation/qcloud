@@ -261,6 +261,7 @@ bool QAmazonConnection::put(QCloudFile &f, QString bucket) {
     QNetworkReply *reply = sendPut(encode(r), f.getContents());
     reply->deleteLater();
     if (reply->error() != 0) {
+        qDebug() << reply->readAll();
         emit cloudError();
         return false;
     }
