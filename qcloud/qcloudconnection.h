@@ -47,7 +47,6 @@ private:
     virtual QNetworkRequest encode(const Request &r) = 0;
 
 signals:
-    void requestFinished();
     void finished();
     void failed();
     void getCloudDirFinished();

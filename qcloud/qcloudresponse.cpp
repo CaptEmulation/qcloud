@@ -51,3 +51,20 @@ QByteArray QCloudResponse::getError() {
         return this->errorMsg;
     }
 }
+
+/*!
+  \brief Returns 0 if there were no errors else the error from QNetworkReply
+  */
+int QCloudResponse::error() {
+    return this->errorCount;
+}
+
+/*!
+  \fn QCloudResponse::finished()
+  \brief emitted when the operation has finished.
+  */
+
+/*!
+  \fn QCloudResponse::cloudError()
+  \brief emitted when there were errors in the operation
+  */

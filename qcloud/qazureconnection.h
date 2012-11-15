@@ -18,31 +18,27 @@ class QAzureConnection : public QCloudConnection
 public:
     ~QAzureConnection();
     QAzureConnection(QByteArray url, QByteArray authentication, QByteArray storageKey);
-
-
     virtual bool put(QCloudFile &f, QString bucket);
     virtual bool put(QCloudDir &dir);
-    virtual QList<QString> getCloudDir();
-    virtual QList<QString> getCloudDirContents(QString bucketName);
+    virtual bool get(QCloudDir &d);
     virtual bool deleteBlob(QString name, QString bucket);
     virtual bool deleteCloudDir(QString bucket);
-
-    virtual QCloudFile* get(QString bucket, QString name);
-    virtual bool get(QCloudDir &d);
     virtual bool cloudDirExists(const QString &dirName);
-    virtual  bool createCloudDir(const QString &dirName);
-
+    virtual bool createCloudDir(const QString &dirName);
+    virtual QList<QString> getCloudDir();
+    virtual QList<QString> getCloudDirContents(QString bucketName);
+    virtual QCloudFile* get(QString bucket, QString name);
     virtual QCloudFileResponse* asyncGetCloudFile(QString &bucket, QString &fileName);
     virtual QCloudListResponse* asyncGetCloudDir();
     virtual QCloudListResponse* asyncGetCloudDirContents(QString &cloudDir);
+    QList<QString> parseCloudDirListings(QByteArray &contents);
 
 private:
     virtual QNetworkRequest encode(const Request &r);
     virtual QNetworkReply* sendPut(const QNetworkRequest &req, const QByteArray &payload);
     virtual QNetworkReply* sendGet(const QNetworkRequest &req);
     virtual QNetworkReply* sendHead(const QNetworkRequest &req);
-    virtual QList<QString> parseCloudDirListings(QByteArray &contents);
-    QList<QString> parseCloudDirContentsListing(QByteArray &reply);
+
 
 
     /**
@@ -87,7 +83,6 @@ signals:
     void setRange(int,int);
 
 private slots:
-    virtual void requestFinished(QNetworkReply*);
 };
 
 #endif // QAZURECONNECTION_H

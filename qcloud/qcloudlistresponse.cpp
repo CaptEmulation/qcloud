@@ -23,7 +23,8 @@ QCloudListResponse::QCloudListResponse(QNetworkReply *reply) {
 /*!
   \brief Checks if the message has been parsed already, if not, parses the message and sets the parsed
   message to a local variable.
-  \returns List of QString that contains the contents of the reply
+
+  returns List of QString that contains the contents of the reply
   */
 QList<QString> QCloudListResponse::getParsed() {
     if (!parsed) {
@@ -74,3 +75,13 @@ void QCloudListResponse::requestFinished() {
 QByteArray QCloudListResponse::getUnparsed() {
     return this->unparsed;
 }
+
+/*!
+  \fn QCloudListResponse::finished()
+  \brief emitted when the operation has finished
+  */
+
+/*!
+  \fn QCloudListResponse::cloudError()
+  \brief emitted when there were errors in the operation
+  */

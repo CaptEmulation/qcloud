@@ -4,7 +4,7 @@
   \class QCloudFile
   \brief QCloudFile is a implementation of the QCloudItem interface.
 
-  Some explanation
+  Contains information if the file is local or not.
   */
 
 
@@ -16,7 +16,7 @@ void QCloudFile::setLocal(bool isLocal) {
 }
 
 /*!
-  \brief Creates a new QCloudFile with the name \a name.
+  \brief Creates a new QCloudFile with the name \a fileName.
   */
 QCloudFile::QCloudFile(QString fileName) {
     this->setLocal(false);
@@ -45,7 +45,8 @@ QCloudFile::QCloudFile(QByteArray contents, QString fileName) {
 }
 
 /*!
-  \brief Same as the previous constructor but uses the \a bucket as a directory for the file.
+  \brief Creates a new QCloudFile and a local file named \a fileName in the directory \a bucket.
+         Also creates a local file containing \a contents.
   */
 QCloudFile::QCloudFile(QByteArray contents, QString fileName, QString bucket)
 {
@@ -86,7 +87,7 @@ QCloudFile::QCloudFile(QByteArray contents, QString fileName, QString bucket)
 /*!
   \brief Creates a new QCloudFile using a QFile.
 
-  When creating QCloudFile using the constructor that takes QFile as a parameter it reads the contents of the
+  When creating QCloudFile using the constructor that takes QFile \a f as a parameter it reads the contents of the
   file to a byte array inside the QCloudFile. This is the default constructor to be used when creating cloudfiles
   from the local filesystem.
   */

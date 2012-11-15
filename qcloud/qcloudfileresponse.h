@@ -19,7 +19,7 @@ public:
 
 signals:
     void finished();
-    void failed();
+    void cloudError();
 
 private slots:
     void replyFinished();

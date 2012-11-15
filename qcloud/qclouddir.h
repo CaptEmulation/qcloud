@@ -31,10 +31,6 @@ private:
     QList<QCloudFile *> contents;
     QString path;
     void createFromALocalDirectory(QDir &d);
-
-
-signals:
-    void transferFinished();
 };
 
 #endif

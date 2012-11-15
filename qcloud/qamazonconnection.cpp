@@ -19,6 +19,9 @@
 
 /*!
  * Constructor
+  \a user username to the service
+  \a password awsaccesskeyid
+  \a secret secretkey
  */
 QAmazonConnection::QAmazonConnection(QByteArray user, QByteArray password, QByteArray secret) {
     this->host = "s3.amazonaws.com";
@@ -36,7 +39,7 @@ QAmazonConnection::~QAmazonConnection() {
 }
 
 /*!
-  Deletes a blob( \a name ) in a bucket ( \a bucket)
+  \brief Deletes a blob( \a name ) in a bucket ( \a bucket), does not work
   */
 bool QAmazonConnection::deleteBlob(QString name, QString bucket) {
     Request r;
@@ -47,7 +50,7 @@ bool QAmazonConnection::deleteBlob(QString name, QString bucket) {
 }
 
 /*!
-  Deletes a whole bucket (\a bucket)
+  \brief Deletes a whole bucket (\a bucket), does not work
   */
 bool QAmazonConnection::deleteCloudDir(QString bucket) {
     Request r;
@@ -57,7 +60,7 @@ bool QAmazonConnection::deleteCloudDir(QString bucket) {
 }
 
 /*!
-  Creates a new clouddir named \a dirName to the cloud. Returns true if success
+  \brief Creates a new clouddir named \a dirName to the cloud. Returns true if success
   else false.
   */
 bool QAmazonConnection::createCloudDir(const QString &dirName) {
@@ -82,7 +85,7 @@ bool QAmazonConnection::createCloudDir(const QString &dirName) {
 }
 
 /*!
-  Checks if the \a dirName exists in the cloud.
+  \brief Checks if the \a dirName exists in the cloud.
   */
 bool QAmazonConnection::cloudDirExists(const QString &dirName) {
     Request r;
@@ -97,7 +100,7 @@ bool QAmazonConnection::cloudDirExists(const QString &dirName) {
 }
 
 /*!
-  Puts a \a d  clouddir to the cloud. If overrideCloud is defined as true
+  \brief Puts a \a d  clouddir to the cloud. If overrideCloud is defined as true
   the whole directory is overridden else only the new files are uploaded.
   */
 bool QAmazonConnection::put(QCloudDir &d) {
@@ -135,9 +138,10 @@ bool QAmazonConnection::put(QCloudDir &d) {
 }
 
 /*!
-  Downloads clouddir \a d to the computer. If overrideLocal is true the function
-  downloads everything and overrides local copies, else it just gets the files that
-  do not exist in the computer.
+  \brief Downloads clouddir \a d to the computer.
+
+  If overrideLocal is true the function downloads everything and overrides local copies,
+  else it just gets the files that do not exist in the computer.
   */
 bool QAmazonConnection::get(QCloudDir &d) {
 
@@ -169,7 +173,7 @@ bool QAmazonConnection::get(QCloudDir &d) {
 }
 
 /*!
-  Downloads the file \a fileName from a bucket \a bucket. Returns a pointer to a new
+  \brief Downloads the file \a fileName from a bucket \a bucket. Returns a pointer to a new
   QCloudFile that is also a local file.
   */
 QCloudFile* QAmazonConnection::get(QString bucket, QString fileName) {
@@ -195,7 +199,7 @@ QCloudFile* QAmazonConnection::get(QString bucket, QString fileName) {
 }
 
 /*!
-  getCloudDir gets the list of buckets in the cloud owned by the creator.
+ \brief getCloudDir gets the list of buckets in the cloud owned by the creator.
   */
 QList<QString> QAmazonConnection::getCloudDir() {
     Request r;
@@ -215,9 +219,8 @@ QList<QString> QAmazonConnection::getCloudDir() {
 }
 
 /*!
-  Gets the contents of a CloudDir \a bucketName as a list of strings.
+  \brief Gets the contents of a CloudDir \a bucketName as a list of strings.
   */
-
 QList<QString> QAmazonConnection::getCloudDirContents(QString bucketName) {
     Request r;
     QNetworkReply *reply;
@@ -248,7 +251,9 @@ void QAmazonConnection::replaceUnallowed(QByteArray *array) {
     array->replace('+', "%2B");
 }
 
-
+/*!
+  \brief Puts the CloudFile \a f to bucket \a bucket
+  */
 bool QAmazonConnection::put(QCloudFile &f, QString bucket) {
     Request r;
     r.headers.insert("verb","PUT");
@@ -270,7 +275,8 @@ bool QAmazonConnection::put(QCloudFile &f, QString bucket) {
 }
 
 /**
-  Creates the request that is then sent to Amazon, everything should be as general as possible and
+  \internal
+  \brief Creates the request that is then sent to Amazon, everything should be as general as possible and
   this should take care of getting buckets and files.
   */
 QNetworkRequest QAmazonConnection::encode(const Request &r) {
@@ -321,14 +327,27 @@ QNetworkRequest QAmazonConnection::encode(const Request &r) {
     return req;
 }
 
+/*!
+  \brief Sets the overrideCloud variable to \a value
+  */
 void QAmazonConnection::setOverrideCloud(bool value) {
     this->overrideCloud = value;
 }
 
+/*!
+  \brief Sets the overrideLocal variabl to \a value
+  */
 void QAmazonConnection::setOverrideLocal(bool value) {
     this->overrideLocal = value;
 }
 
+/*!
+  \brief Sends put-request \a r with payload \a payload
+
+  The internal implemenation has QEventLoop running until the reply
+  is done.
+
+  */
 QNetworkReply* QAmazonConnection::sendPut(const QNetworkRequest &r, const QByteArray &payload) {
     QEventLoop l;
     QNetworkReply *reply = manager->put(r, payload);
@@ -338,6 +357,12 @@ QNetworkReply* QAmazonConnection::sendPut(const QNetworkRequest &r, const QByteA
     return reply;
 }
 
+/*!
+  \brief Sends get-request \a r
+
+  The internal implemenation has QEventLoop running until the reply
+  is done.
+  */
 QNetworkReply* QAmazonConnection::sendGet(const QNetworkRequest &r) {
     QEventLoop l;
     QNetworkReply *reply = manager->get(r);
@@ -347,6 +372,12 @@ QNetworkReply* QAmazonConnection::sendGet(const QNetworkRequest &r) {
     return reply;
 }
 
+/*!
+  \brief Sends head-request \a r
+
+  The internal implemenation has QEventLoop running until the reply
+  is done.
+  */
 QNetworkReply* QAmazonConnection::sendHead(const QNetworkRequest &r) {
     QEventLoop l;
     QNetworkReply *reply = manager->head(r);
@@ -356,8 +387,9 @@ QNetworkReply* QAmazonConnection::sendHead(const QNetworkRequest &r) {
 }
 
 /**
-  Will be changed to use QVector<QCloud> tahi QVector<QCloudBucket *>, and there will be a
-  matching parseBucketContentsListing().
+  \brief Parses the \a message to a list of strings.
+
+
   */
 QList<QString> QAmazonConnection::parseCloudDirListings(QByteArray &message){
     QXmlStreamReader reader;
@@ -373,7 +405,7 @@ QList<QString> QAmazonConnection::parseCloudDirListings(QByteArray &message){
 }
 
 /*!
-  \brief Parses message received from cloud and returns a list of blobs in a clouddir.
+  \brief Parses message received from cloud \a message and returns a list of blobs in a clouddir.
 
   Parser method that returns a list of strings that contain the files included in the getBucketContents()
   response.
@@ -392,7 +424,12 @@ QList<QString> QAmazonConnection::parseCloudDirContentListing(QByteArray *messag
     return files;
 }
 
-//SLOTS
+/*!
+  \brief Does getCloudDir, but without using the send* functions. Returns pointer to the
+  new list response.
+
+  Does not use QEventLoop
+  */
 QCloudListResponse* QAmazonConnection::asyncGetCloudDir() {
     Request r;
     QNetworkReply *reply;
@@ -405,6 +442,11 @@ QCloudListResponse* QAmazonConnection::asyncGetCloudDir() {
     return new QCloudListResponse(reply);
 }
 
+/*!
+  \brief Gets the contents of the \a cloudDir
+
+  Does not use QEventLoop
+  */
 QCloudListResponse* QAmazonConnection::asyncGetCloudDirContents(QString &cloudDir) {
     Request r;
     QNetworkReply *reply;
@@ -416,6 +458,11 @@ QCloudListResponse* QAmazonConnection::asyncGetCloudDirContents(QString &cloudDi
     return new QCloudListResponse(reply);
 }
 
+/*!
+  \brief Gets the file \a fileName from the bucket \a bucket.
+
+  Does not use QEventLoop
+  */
 QCloudFileResponse* QAmazonConnection::asyncGetCloudFile(QString &bucket, QString &fileName) {
     Request r;
     QNetworkReply *reply;
@@ -429,3 +476,22 @@ QCloudFileResponse* QAmazonConnection::asyncGetCloudFile(QString &bucket, QStrin
     return new QCloudFileResponse(reply);
 }
 
+/*!
+  \fn QAmazonConnection::cloudError()
+  \brief Is emitted when there went something wrong with the transfer
+  */
+
+/*!
+  \fn QAmazonConnection::finished()
+  \brief Is emitted when the operation has finished
+ */
+
+/*!
+  \fn QAmazonConnection::setRange()
+  \brief is emitted when many files are downloaded at once. 
+  */
+
+/*!
+  \fn QAmazonConnection::valueChanged()
+  \brief valueChanged() is emitted when a file has been downloaded. This way the GUI can be updated according.
+  */

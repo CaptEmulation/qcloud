@@ -5,18 +5,23 @@
   \brief Does HMAC hashes with SHA1 and SHA256 encryptions.
 
   HmacSHA class provides the hash function that is needed to make hases of the stringToSign arrays. These
-  are used to verify the senders identity. HmacSHA uses the \l{QCryptographicHash} from Qt5 so Qt5 is required
+  are used to verify the senders identity. HmacSHA uses the QCryptographicHash from Qt5 so Qt5 is required
   or a custom build of Qt.
   */
 
 /*!
   \enum HmacSHA::HmacSHAType
-  Enumeration is used to identify the wanted type of hash, supports SHA1 and SHA256
+
+  Specifies the type of SHA algorithm used with HMAC.
+
+  \value SHA1 Sha1
+  \value SHA256 Sha256
+
   */
 
 /*!
   Library to provide the Hash-based message authentication codes using SHA1 and SHA256 algorithms. At the moment
-  both are used but in the future SHA256 will be the only one.
+  both are used but in the future SHA256 will be the only one. \a parent is the parent
   */
 HmacSHA::HmacSHA(QObject *parent) : QObject(parent){}
 

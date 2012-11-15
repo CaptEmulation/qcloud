@@ -9,6 +9,11 @@
   and the user can ask for files located inside it.
 
   */
+
+/*!
+  \fn QCloudDir::QCloudDir(QDir &dir)
+  \brief creates new clouddir from local directory \a dir
+  */
 QCloudDir::QCloudDir(QDir &dir){
     contents = QList<QCloudFile *>();
     createFromALocalDirectory(dir);
@@ -123,6 +128,10 @@ QList<QString> QCloudDir::getCloudDirContentsAsString() {
     return fileNames;
 }
 
+/*!
+  \brief returns the count of files in this folder
+  \return contents.size
+  */
 int QCloudDir::size() {
     return this->contents.size();
 }

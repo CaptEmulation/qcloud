@@ -71,6 +71,9 @@ QString QAzureConnection::dateInRFC1123() {
     return httpDate;
 }
 
+/*!
+  Deletes blob indicated by \a name in clouddir \a bucket
+  */
 bool QAzureConnection::deleteBlob(QString name, QString bucket) {
     Request r;
     r.headers.insert("verb", "GET");
@@ -264,7 +267,7 @@ QList<QString> QAzureConnection::getCloudDirContents(QString bucketName) {
     r.headers.clear();
     QByteArray contents = reply->readAll();
     reply->deleteLater();
-    return parseCloudDirContentsListing(contents);
+    return parseCloudDirListings(contents);
 }
 
 /*!
@@ -283,6 +286,9 @@ QCloudFile* QAzureConnection::get(QString bucket, QString name){
     return f;
 }
 
+/*!
+  \reimp
+  */
 QCloudFileResponse* QAzureConnection::asyncGetCloudFile(QString &bucket, QString &fileName) {
     Request r;
     QNetworkReply *reply;
@@ -297,7 +303,9 @@ QCloudFileResponse* QAzureConnection::asyncGetCloudFile(QString &bucket, QString
     return new QCloudFileResponse(reply);
 }
 
-
+/*!
+  \reimp
+  */
 QCloudListResponse* QAzureConnection::asyncGetCloudDirContents(QString &cloudDir) {
     Request r;
     QNetworkReply *reply;
@@ -310,6 +318,9 @@ QCloudListResponse* QAzureConnection::asyncGetCloudDirContents(QString &cloudDir
     return new QCloudListResponse(reply);
 }
 
+/*!
+  \reimp
+  */
 QCloudListResponse* QAzureConnection::asyncGetCloudDir() {
     Request r;
     QNetworkReply *reply;
@@ -322,6 +333,9 @@ QCloudListResponse* QAzureConnection::asyncGetCloudDir() {
     return new QCloudListResponse(reply);
 }
 
+/*!
+  \internal
+  */
 QNetworkRequest QAzureConnection::encode(const Request &r) {
     QString urlString("http://" + this->url);
 
@@ -380,9 +394,16 @@ QNetworkRequest QAzureConnection::encode(const Request &r) {
     return req;
 }
 
+/*!
+  \reimp
+  */
 void QAzureConnection::setOverrideCloud(bool value) {
     this->overrideCloud = value;
 }
+
+/*!
+  \reimp
+  */
 
 void QAzureConnection::setOverrideLocal(bool value) {
     this->overrideLocal = value;
@@ -427,6 +448,10 @@ QNetworkReply* QAzureConnection::sendHead(const QNetworkRequest &req) {
 }
 
 //PARSERS
+/*!
+  \fn QAzureConnection::parseCloudDirListings(QByteArray &contents)
+  \brief Parses \a contents and finds Name-tags from the array. Returns the list of names
+  */
 QList<QString> QAzureConnection::parseCloudDirListings(QByteArray &contents) {
     QXmlStreamReader reader;
     reader.addData(contents);
@@ -440,20 +465,3 @@ QList<QString> QAzureConnection::parseCloudDirListings(QByteArray &contents) {
     return foo;
 }
 
-QList<QString> QAzureConnection::parseCloudDirContentsListing(QByteArray &contents) {
-    QXmlStreamReader reader;
-    QList<QString> foo;
-    reader.addData(contents);
-    while (!reader.atEnd()) {
-        reader.readNextStartElement();
-        if (reader.name().toAscii() == "Name") foo.append(reader.readElementText());
-    }
-    return foo;
-}
-
-//SLOTS
-
-
-void QAzureConnection::requestFinished(QNetworkReply *) {
-
-}

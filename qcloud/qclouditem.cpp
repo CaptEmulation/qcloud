@@ -9,7 +9,7 @@
   */
 
 /*!
- Constructor
+ Constructor \a parent
  */
 QCloudItem::QCloudItem(QObject *parent) :
     QObject(parent)
@@ -19,10 +19,6 @@ QCloudItem::QCloudItem(QObject *parent) :
 
 /*!
   \fn QCloudItem::isLocal()
-  \brief The only method to be implemented. If the file has local content this should be set to true else false
-
-  \example QCloudFile* file = new QCloudFile(QString("cloudFile");
-           file->isLocal() = false;
-           QCloudFile* f2 = new QCloudFile(QByteArray("sdfasdf"), QString("localFile");
-           f2->isLocal() = true;
+  \brief The only method to be implemented.
+  \return If the file has local content this should be set to true else false
   */
