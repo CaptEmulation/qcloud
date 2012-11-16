@@ -11,8 +11,62 @@ Linux: (Tested: Debian 2.6.32-45)
  qmake
  make
 
+
+The user needs account on either amazon or windows azure. The credentials to amazon can be found
+in the aws dashboard (https://console.aws.amazon.com/). Azure's credentials can be found from
+https://manage.windowsazure.com/. Insert the credentials as cloudconnections params as they 
+are presented in the sites. Do not do anything to them. 
+
+Note:
+
+Amazon has a interesting naming contention for the buckets. The bucket names are shared between
+all of the users (a single namespace), so the most used are already taken. The rest of the naming
+rules are as follows:
+ 
+    Bucket names must be at least 3 and no more than 63 characters long
+    Bucket name must be a series of one or more labels separated by a period (.), where each label:
+    Must start with a lowercase letter or a number
+    Must end with a lowercase letter or a number
+    Can contain lowercase letters, numbers and dashes
+    Bucket names must not be formatted as an IP address (e.g., 192.168.5.4)
+
+
+Example usage.
+ Getting a file from a certain bucket in the cloud:
+    Include the lib in your project. 
+    Create a new CloudConnection for the service you want (Azure*, Amazon*)
+    Get the list of buckets with QCloudConnection::getCloudDir()
+    Get the contents of certain bucket with QCloudConection::getCloudDirContents(QString name)
+    Get the file using QCloudConnection::get(QString bucket, QString fileName)
+
+ Putting a file to a certain bucket in the cloud:
+    Include the lib
+    Create new connection for the service
+    if (bucketname not known)
+       Get bucket list with getCloudDir()
+    create a QFile that contains the file
+    Create qcloudfile from the qfile
+    call put(qcloudfile, bucket)
+
+ examples/QCloudTransfer/main.cpp is a good indication how to use the api.
+
 TODO:
- todo
+ -Both services need implementation of the deleteBlob and deleteCloudDir -functions. 
+
+ -As AmazonS3 has the requirement that buckets cannot contain uppercase letters, 
+  somekind of check should be placed somewhere. At the moment error is thrown.
+
+ -The content-type-header should be replaced according to the real type of the
+  file sent. At the moment it is always text/plain.
+
+ -As using QCloud should be as similar to QNAM as possible, the structure should 
+  be changed to use the async methods.
+ 
+ -QCloudTransfer-example supports only AmazonS3 at the moment. There needs to be 
+  some change that can change the service provider according the params. Maybe 
+  in the auth.txt the first line could be the provider (aws, azure) etc..
+
+ -As a cloudconnection is created check if the credentials are correct
 
 If bugs are found please contact me at jlaitinen@gmail.com, please
 include [qcloud] in the header.

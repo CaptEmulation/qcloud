@@ -320,9 +320,6 @@ QNetworkRequest QAmazonConnection::encode(const Request &r) {
         url.addEncodedQueryItem("Content-Length", value.toAscii());
     }
     url.addEncodedQueryItem("Expires", timeString.toAscii());
-    qDebug() << "Urlstring : "<< urlString;
-    qDebug() << "URL: " << url.toString();
-    qDebug() << "stringToSign: " << QString(stringToSign);
     req.setUrl(url);
     return req;
 }
