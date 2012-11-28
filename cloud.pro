@@ -9,4 +9,4 @@ win32:{
     docs.commands = qdoc doc/qcloud.qdocconf
 }
 docs.depends = FORCE
-QMAKE_EXTRA_TARGETS += docs
+QMAKE_EXTRA_TARGETS += docs tests

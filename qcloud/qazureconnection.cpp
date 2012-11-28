@@ -10,7 +10,7 @@ QAzureConnection::~QAzureConnection() {
   \brief Implementation of the interface QCloudConnection for Azure.
 
   Constructor to create new QAzureConnections. This contains three parameters and all should be in the right format.
-  The first parameter is QByteArray containing the url of the service i.e. "http://kikkare.blob.core.windows.net" where
+  The first parameter is QByteArray containing the url of the service i.e. "kikkare.blob.core.windows.net" where
   kikkare is the storage accounts name. Authentication contains either SharedKey or SharedKeyLite. At the moment, this
   library has better support for SharedKey authentication. storageKey parameter should be made with QByteArray::fromBase64()
   as the key provided by Microsoft is Base64 encoded. The constructor also creates a new Headers-struct according to the
@@ -107,8 +107,10 @@ bool QAzureConnection::cloudDirExists(const QString &dirName) {
     //Azure does n8ot provide a API-call for checking the existance of containers.
 
     if (reply->error() != 0) {
+        emit cloudError();
         return false;
     }
+    emit finished();
     return true;
 }
 
@@ -127,13 +129,12 @@ bool QAzureConnection::createCloudDir(const QString &name) {
     r.headers.clear();
 
     if (reply->error() > 0) {
-        qDebug() << QString("Problems creating cloudDir %1 to the cloud").arg(name);
-        qDebug() << reply->errorString();
-        qDebug() << reply->readAll();
         reply->deleteLater();
+        emit cloudError();
         return false;
     }
     reply->deleteLater();
+    emit finished();
     return true;
 }
 
@@ -148,12 +149,13 @@ bool QAzureConnection::put(QCloudFile &f, QString bucket) {
     r.headers.insert("size", QByteArray::number(f.getSize()));
     r.headers.insert("bucket", bucket);
     reply = sendPut(encode(r), f.getContents());
-    r.headers.clear();
-    if (reply->error() > 0) {
+    if (reply->error() != 0) {
         qDebug() << reply->errorString();
         qDebug() << reply->readAll();
+        emit cloudError();
         return false;
     }
+    emit finished();
     return true;
 }
 
@@ -281,6 +283,10 @@ QCloudFile* QAzureConnection::get(QString bucket, QString name){
     r.headers.insert("path", "/" + bucket + "/" + name);
     r.headers.insert("bucket", bucket);
     reply = sendGet(encode(r));
+    if (reply->error() != 0) {
+        emit cloudError();
+        return 0;
+    }
     QCloudFile *f = new QCloudFile(reply->readAll(), name,bucket);
     reply->deleteLater();
     return f;
@@ -300,7 +306,7 @@ QCloudFileResponse* QAzureConnection::asyncGetCloudFile(QString &bucket, QString
     QNetworkRequest requ = encode(r);
     reply = manager->get(requ);
 
-    return new QCloudFileResponse(reply);
+    return new QCloudFileResponse(reply, fileName, bucket);
 }
 
 /*!
@@ -390,7 +396,7 @@ QNetworkRequest QAzureConnection::encode(const Request &r) {
         req.setRawHeader("Content-Length", r.headers.value("size").toAscii());
         req.setRawHeader("x-ms-blob-type", "BlockBlob");
     }
-    qDebug() << stringToSign;
+
     return req;
 }
 
@@ -415,8 +421,7 @@ void QAzureConnection::setOverrideLocal(bool value) {
   */
 QNetworkReply* QAzureConnection::sendGet(const QNetworkRequest &req) {
     QEventLoop loop;
-    QNetworkReply *reply;
-    reply = manager->get(req);
+    QNetworkReply *reply = manager->get(req);
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
     return reply;
@@ -427,8 +432,7 @@ QNetworkReply* QAzureConnection::sendGet(const QNetworkRequest &req) {
   */
 QNetworkReply* QAzureConnection::sendPut(const QNetworkRequest &req, const QByteArray &payload) {
    QEventLoop loop;
-   QNetworkReply *reply;
-   reply = manager->put(req, payload);
+   QNetworkReply *reply = manager->put(req, payload);
    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
    loop.exec();
    return reply;
@@ -439,11 +443,9 @@ QNetworkReply* QAzureConnection::sendPut(const QNetworkRequest &req, const QByte
   */
 QNetworkReply* QAzureConnection::sendHead(const QNetworkRequest &req) {
     QEventLoop l;
-    QNetworkReply *reply;
-    reply = manager->head(req);
+    QNetworkReply *reply = manager->head(req);
     connect(reply, SIGNAL(finished()), &l, SLOT(quit()));
     l.exec();
-
     return reply;
 }
 
@@ -462,6 +464,7 @@ QList<QString> QAzureConnection::parseCloudDirListings(QByteArray &contents) {
             foo.append(reader.readElementText());
         }
     }
+    emit finished();
     return foo;
 }
 

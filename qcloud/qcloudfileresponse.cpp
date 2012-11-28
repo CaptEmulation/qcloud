@@ -12,11 +12,11 @@
   QCFR is part of the refactoring of the QCloudAPI and it will be fully integrated in
   the next phase.
   */
-QCloudFileResponse::QCloudFileResponse(QNetworkReply *reply) {
+QCloudFileResponse::QCloudFileResponse(QNetworkReply *reply, QString filename, QString bucket) {
     this->own = reply;
     connect(reply, SIGNAL(finished()), SLOT(replyFinished()));
-    this->bucket = "";
-    this->filename = "";
+    this->bucket = bucket;
+    this->filename = filename;
 }
 
 /*!

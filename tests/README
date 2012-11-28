@@ -1,0 +1,10 @@
+Tests for QCloud
+
+There are at the moment no automation which side to run and the file structures are hard coded, but when they are there 
+all tests are green.
+
+Before running one should add their connection information to each test. This is kinda stupid, but will change someday
+
+todo:
+ generalization of tests
+ making it so that tests create the needed file structure to cloud before running

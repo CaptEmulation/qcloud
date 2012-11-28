@@ -48,7 +48,7 @@ private:
 
 signals:
     void finished();
-    void failed();
+    void cloudError();
     void getCloudDirFinished();
     void putCloudDirFinished();
 };

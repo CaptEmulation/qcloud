@@ -59,9 +59,6 @@ private:
 signals:
     void valueChanged(int);
     void setRange(int,int);
-    void finished();
-    void cloudError();
-
 
 };
 

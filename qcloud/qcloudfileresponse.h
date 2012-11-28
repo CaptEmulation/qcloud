@@ -10,7 +10,7 @@ class QCloudFileResponse : public QObject
 {
     Q_OBJECT
 public:
-    QCloudFileResponse(QNetworkReply* reply);
+    QCloudFileResponse(QNetworkReply* reply, QString filename, QString bucket);
     QCloudFile* getResponse();
     QByteArray getUnparsed();
     void setFileName(QString name);

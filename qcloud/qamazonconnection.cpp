@@ -74,13 +74,11 @@ bool QAmazonConnection::createCloudDir(const QString &dirName) {
     r.headers.clear();
 
     if (reply->error() != 0) {
-        qDebug() << reply->errorString();
-        qDebug() << reply->readAll();
+        emit cloudError();;
         reply->deleteLater();
         return false;
     }
     reply->deleteLater();
-    qDebug() << reply->readAll();
     return true;
 }
 
@@ -93,8 +91,8 @@ bool QAmazonConnection::cloudDirExists(const QString &dirName) {
     r.headers.insert("bucket", dirName);
     QNetworkReply *reply = sendHead(encode(r));
     if (reply->error() != 0) {
-       return false;
-       emit cloudError();
+        emit cloudError();
+        return false;
     }
     return true;
 }
@@ -186,10 +184,7 @@ QCloudFile* QAmazonConnection::get(QString bucket, QString fileName) {
 
     QNetworkReply *reply = sendGet(encode(r));
     if (reply->error() != 0) {
-        qDebug() << reply->errorString();
-        qDebug() << reply->readAll();
-        qDebug() << "error from get";
-        emit failed();
+        emit cloudError();
         return new QCloudFile("", fileName, bucket);
     }
     QCloudFile* file = new QCloudFile(reply->readAll(), fileName, bucket);
@@ -230,8 +225,8 @@ QList<QString> QAmazonConnection::getCloudDirContents(QString bucketName) {
 
     reply = sendGet(encode(r));
     if (reply->error() != 0) {
-        qDebug() << reply->errorString();
-        qDebug() << reply->readAll();
+        emit cloudError();
+        return QList<QString>();
     }
     QByteArray array = reply->readAll();
     reply->deleteLater();
@@ -266,7 +261,6 @@ bool QAmazonConnection::put(QCloudFile &f, QString bucket) {
     QNetworkReply *reply = sendPut(encode(r), f.getContents());
     reply->deleteLater();
     if (reply->error() != 0) {
-        qDebug() << reply->readAll();
         emit cloudError();
         return false;
     }
@@ -470,7 +464,7 @@ QCloudFileResponse* QAmazonConnection::asyncGetCloudFile(QString &bucket, QStrin
     r.headers.insert("filename", fileName);
     req = encode(r);
     reply = manager->get(req);
-    return new QCloudFileResponse(reply);
+    return new QCloudFileResponse(reply, fileName, bucket);
 }
 
 /*!
