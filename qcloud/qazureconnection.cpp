@@ -353,7 +353,7 @@ QNetworkRequest QAzureConnection::encode(const Request &r) {
         urlString += "?" + r.headers.value("operation");
     }
 
-    QUrl url = QUrl::fromEncoded(urlString.toAscii());
+    QUrl url = QUrl::fromEncoded(urlString.toUtf8());
     QNetworkRequest req;
     req.setUrl(url);
 
@@ -390,10 +390,10 @@ QNetworkRequest QAzureConnection::encode(const Request &r) {
     QByteArray test = this->authentication + " " + this->storageAccountName + ":" + hash;
 
     req.setRawHeader("Authorization", test);
-    req.setRawHeader("x-ms-date", date.toAscii());
-    req.setRawHeader("x-ms-version", version.toAscii());
+    req.setRawHeader("x-ms-date", date.toUtf8());
+    req.setRawHeader("x-ms-version", version.toUtf8());
     if(r.headers.value("verb") == "PUT")  {
-        req.setRawHeader("Content-Length", r.headers.value("size").toAscii());
+        req.setRawHeader("Content-Length", r.headers.value("size").toUtf8());
         req.setRawHeader("x-ms-blob-type", "BlockBlob");
     }
 

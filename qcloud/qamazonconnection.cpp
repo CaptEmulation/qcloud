@@ -4,6 +4,7 @@
 
 #include <QDateTime>
 #include <QEventLoop>
+#include <QUrlQuery>
 
 /*!
   \class QAmazonConnection
@@ -276,7 +277,7 @@ bool QAmazonConnection::put(QCloudFile &f, QString bucket) {
 QNetworkRequest QAmazonConnection::encode(const Request &r) {
 
     QString timeString = QString::number(QDateTime::currentMSecsSinceEpoch()/1000+200);
-    QByteArray stringToSign = r.headers.value("verb").toAscii() + "\n";
+    QByteArray stringToSign = r.headers.value("verb").toUtf8() + "\n";
 
     stringToSign += "\n\n";
     stringToSign += timeString + "\n";
@@ -306,14 +307,18 @@ QNetworkRequest QAmazonConnection::encode(const Request &r) {
     replaceUnallowed(&hashedSignature);
     QNetworkRequest req;
 
-    url.addEncodedQueryItem("AWSAccessKeyId", this->password);
-    url.addEncodedQueryItem("Signature", hashedSignature);
+    QUrlQuery query;
+
+    query.addQueryItem("AWSAccessKeyId", this->password);
+    query.addQueryItem("Signature", hashedSignature);
+
     if(r.headers.value("verb") == "PUT") {
         QString value = r.headers.value("filesize");
-        if (value != "0") url.addEncodedQueryItem("Content-Type", r.headers.value("Content-Type").toAscii());
-        url.addEncodedQueryItem("Content-Length", value.toAscii());
+        if (value != "0") query.addQueryItem("Content-Type", r.headers.value("Content-Type").toUtf8());
+        query.addQueryItem("Content-Length", value.toUtf8());
     }
-    url.addEncodedQueryItem("Expires", timeString.toAscii());
+    query.addQueryItem("Expires", timeString.toUtf8());
+    url.setQuery(query);
     req.setUrl(url);
     return req;
 }

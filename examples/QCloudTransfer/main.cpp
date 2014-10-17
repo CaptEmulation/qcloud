@@ -9,7 +9,8 @@ QList<QString> readAuthFromFile() {
         qDebug() << "could not open file auth.txt, you sure it exists?";
     }
     QByteArray line;
-    while ((line = f.readLine()) != 0) {
+    while (f.canReadLine()) {
+        line = f.readLine();
         line.replace("\n", "");
         auth.append(line);
     }
@@ -28,7 +29,7 @@ int getFile() {
     qDebug() << "Doing get-operation";
     qDebug() << "Reading authentication from file auth.txt";
     QList<QString> auth = readAuthFromFile();
-    QAmazonConnection conn(auth.at(0).toAscii(), auth.at(1).toAscii(), auth.at(2).toAscii());
+    QAmazonConnection conn(auth.at(0).toUtf8(), auth.at(1).toUtf8(), auth.at(2).toUtf8());
     qDebug() << "Connection initialized";
     QList<QString> buckets = conn.getCloudDir();
     qDebug() << "Your account contained the following buckets:";
@@ -56,7 +57,7 @@ int putFile(QString name) {
     qDebug() << "Doing put-operation";
     qDebug() << "Reading authentication from file auth.txt";
     QList<QString> auth = readAuthFromFile();
-    QAmazonConnection conn(auth.at(0).toAscii(), auth.at(1).toAscii(), auth.at(2).toAscii());
+    QAmazonConnection conn(auth.at(0).toUtf8(), auth.at(1).toUtf8(), auth.at(2).toUtf8());
     qDebug() << "Connection initialized";
     QList<QString> buckets = conn.getCloudDir();
     qDebug() << "Your account contained the following buckets:";
