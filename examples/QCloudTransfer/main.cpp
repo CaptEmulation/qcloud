@@ -1,6 +1,7 @@
 #include <QtCore/QCoreApplication>
 #include "qamazonconnection.h"
 #include <iostream>
+#include <QDebug>
 
 QList<QString> readAuthFromFile() {
     QList<QString> auth;
@@ -8,12 +9,17 @@ QList<QString> readAuthFromFile() {
     if (!f.open(QIODevice::ReadWrite | QIODevice::Text)) {
         qDebug() << "could not open file auth.txt, you sure it exists?";
     }
+    qDebug() << "Reading auth.tx with length: " << f.size();
     QByteArray line;
-    while (f.canReadLine()) {
+    do {
         line = f.readLine();
-        line.replace("\n", "");
-        auth.append(line);
-    }
+        if (line.length()) {
+            //line.replace("\n", "");
+            qDebug() << "Read: " << line;
+            auth.append(line);
+        }
+
+    } while (line.length());
     f.close(); 
 
     return auth;
